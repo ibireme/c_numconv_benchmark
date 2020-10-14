@@ -3,6 +3,7 @@
  */
 
 #include <charconv>
+#include <cstring>
 #include "benchmark.h"
 
 extern "C" {

@@ -23,7 +23,7 @@ Build and run:
 mkdir build
 cd build
 cmake ..
-cmake --build .
+cmake --build . --config Release
 ./run_itoa -o report_itoa.html
 ./run_atoi -o report_atoi.html
 ./run_dtoa -o report_dtoa.html
