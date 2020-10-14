@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'>
+<title>Report</title>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/highcharts/8.2.0/highcharts.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/highcharts/8.2.0/modules/series-label.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/highcharts/8.2.0/modules/exporting.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/highcharts/8.2.0/modules/export-data.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/highcharts/8.2.0/modules/offline-exporting.min.js'></script>
+<link rel='stylesheet' type='text/css' href='https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.0/css/bulma.min.css'>
+<style type='text/css'> hr { height: 1px; margin: 5px 0; background-color: #999999; } </style>
+</head>
+<body>
+<nav class='navbar is-light is-fixed-top' role='navigation' aria-label='main navigation'>
+    <div class='navbar-brand'>
+        <a class='navbar-item' href='#'>Report</a>
+        <a role='button' class='navbar-burger burger' aria-label='menu' data-target='main-menu'
+            onclick='document.querySelector(".navbar-menu").classList.toggle("is-active");'>
+            <span aria-hidden='true'></span>
+            <span aria-hidden='true'></span>
+            <span aria-hidden='true'></span>
+        </a>
+    </div>
+    <div id='main-menu' class='navbar-menu'>
+        <div class='navbar-start'>
+            <div class='navbar-item has-dropdown is-hoverable'>
+                <a class='navbar-link'>Info</a>
+                <div class='navbar-dropdown'>
+                    <a class='navbar-item'>Compiler: Microsoft Visual C++ 2019 (1927)</a>
+                    <a class='navbar-item'>OS: Windows 64-bit</a>
+                    <a class='navbar-item'>CPU: Intel(R) Core(TM) i5-8259U CPU @ 2.30GHz</a>
+                    <a class='navbar-item'>CPU Frequency: 2194.59 MHz</a>
+                </div>
+            </div>
+            <div class='navbar-item has-dropdown is-hoverable'>
+                <a class='navbar-link'>Charts</a>
+                <div class='navbar-dropdown'>
+                    <a class='navbar-item' href='#chart_0'>random</a>
+                    <a class='navbar-item' href='#chart_1'>random (random len)</a>
+                    <a class='navbar-item' href='#chart_2'>random (fixed len)</a>
+                    <a class='navbar-item' href='#chart_3'>random no exp (random len)</a>
+                    <a class='navbar-item' href='#chart_4'>random no exp (fixed len)</a>
+                    <a class='navbar-item' href='#chart_5'>normalized (random len)</a>
+                    <a class='navbar-item' href='#chart_6'>normalized (fixed len)</a>
+                    <a class='navbar-item' href='#chart_7'>integer (random len)</a>
+                    <a class='navbar-item' href='#chart_8'>integer (fixed len)</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a name='chart_0'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_0' style='width: 640px; height: 420px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_0', {
+    chart: { type: 'bar' },
+    title: { text: 'random' },
+    subtitle: { text: 'random double number in all binary range, ignore nan and inf' },
+    credits: { enabled: false },
+    xAxis: { allowDecimals: true, categories: ['libc', 'abseil', 'david_gay', 'google', 'yy', 'lemire', 'yy_fast', 'null'], type: 'linear' },
+    yAxis: { title: { text: 'CPU cycles' }, allowDecimals: true, type: 'linear' },
+    tooltip: {valueDecimals: 2, shared: false, crosshairs: false, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: false },
+    plotOptions: {
+        bar: { groupPadding: 0.000000, pointPadding: 0.100000, borderWidth: 0.000000, colorByPoint: true },
+        series: { label: { enabled: false}, dataLabels: { enabled: true , allowOverlap: true, format: '{point.y:.2f}' } }
+    },
+    series: [
+        { data: [1164.824097, 335.978821, 294.483154, 279.996185, 156.742889, 150.440308, 119.002800, 5.993594] }
+    ]
+});
+</script>
+
+<a name='chart_1'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_1' style='width: 640px; height: 420px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_1', {
+    chart: { type: 'bar' },
+    title: { text: 'random (random len)' },
+    subtitle: { text: 'random significant digit count (1-17)' },
+    credits: { enabled: false },
+    xAxis: { allowDecimals: true, categories: ['libc', 'abseil', 'david_gay', 'google', 'yy', 'lemire', 'yy_fast', 'null'], type: 'linear' },
+    yAxis: { title: { text: 'CPU cycles' }, allowDecimals: true, type: 'linear' },
+    tooltip: {valueDecimals: 2, shared: false, crosshairs: false, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: false },
+    plotOptions: {
+        bar: { groupPadding: 0.000000, pointPadding: 0.100000, borderWidth: 0.000000, colorByPoint: true },
+        series: { label: { enabled: false}, dataLabels: { enabled: true , allowOverlap: true, format: '{point.y:.2f}' } }
+    },
+    series: [
+        { data: [1127.692139, 330.864197, 282.421661, 234.091156, 160.275574, 133.957642, 121.390182, 5.993594] }
+    ]
+});
+</script>
+
+<a name='chart_2'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_2' style='width: 800px; height: 540px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_2', {
+    chart: { type: 'line' },
+    title: { text: 'random (fixed len)' },
+    subtitle: { text: 'fixed significant digit count' },
+    credits: { enabled: false },
+    xAxis: { title: { text: 'digit count' }, tickInterval: 1.000000, allowDecimals: true, type: 'linear' },
+    yAxis: { title: { text: 'average CPU cycles' }, allowDecimals: true, type: 'logarithmic' },
+    tooltip: {valueDecimals: 2, shared: true, crosshairs: true, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: true },
+    plotOptions: {
+        line: { pointStart: 1.000000, pointInterval: 1.000000 },
+        series: { label: { enabled: false}, dataLabels: { enabled: false , allowOverlap: true} }
+    },
+    series: [
+        { name: 'libc', data: [841.391846, 881.594360, 896.389954, 906.763184, 920.707581, 931.288086, 941.903687, 955.540222, 962.603333, 1053.151123, 1069.871948, 1080.922241, 1091.705811, 1099.766724, 1112.317383, 1123.276245, 1133.129028] },
+        { name: 'abseil', data: [283.915588, 284.392242, 286.884766, 290.286377, 291.709808, 293.891449, 295.252777, 299.224396, 301.680359, 305.054138, 306.951935, 309.103455, 311.211945, 312.289062, 316.041199, 319.152496, 318.776062] },
+        { name: 'david_gay', data: [165.817291, 186.027725, 198.346008, 211.604980, 226.289688, 231.748734, 240.000168, 252.305115, 264.053802, 278.705719, 278.600952, 279.061584, 292.730530, 296.892242, 309.217010, 291.547882, 310.523865] },
+        { name: 'google', data: [132.902634, 150.517654, 158.872711, 166.834198, 175.029236, 182.728592, 190.517487, 199.295471, 207.184570, 215.705368, 223.717148, 230.270050, 240.147614, 239.507523, 255.598907, 252.556198, 268.362183] },
+        { name: 'yy', data: [119.977791, 123.888054, 125.010109, 127.918327, 129.063248, 130.084717, 131.940598, 133.547302, 134.671265, 135.640533, 137.384399, 139.308472, 140.120773, 142.125244, 143.633270, 144.621216, 147.850998] },
+        { name: 'lemire', data: [92.532845, 87.915817, 89.074837, 93.977234, 98.098946, 102.422211, 107.044189, 110.240822, 106.999611, 111.124756, 115.315811, 118.736481, 121.216064, 125.421219, 128.031097, 137.392776, 141.030243] },
+        { name: 'yy_fast', data: [76.200287, 80.635574, 80.893509, 83.051147, 84.857491, 86.073280, 88.497993, 90.957382, 92.097351, 93.735672, 95.017380, 97.374275, 98.393082, 100.484039, 101.938721, 103.047066, 105.535027] },
+        { name: 'null', data: [4.996122, 4.995741, 4.994979, 4.994979, 4.996503, 4.996503, 4.994979, 4.994979, 4.995360, 4.995360, 4.995360, 4.994979, 4.994598, 4.995741, 4.996122, 4.996503, 4.994979] }
+    ]
+});
+</script>
+
+<a name='chart_3'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_3' style='width: 640px; height: 420px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_3', {
+    chart: { type: 'bar' },
+    title: { text: 'random no exp (random len)' },
+    subtitle: { text: 'random significant digit count (1-17)' },
+    credits: { enabled: false },
+    xAxis: { allowDecimals: true, categories: ['libc', 'abseil', 'google', 'david_gay', 'yy', 'lemire', 'yy_fast', 'null'], type: 'linear' },
+    yAxis: { title: { text: 'CPU cycles' }, allowDecimals: true, type: 'linear' },
+    tooltip: {valueDecimals: 2, shared: false, crosshairs: false, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: false },
+    plotOptions: {
+        bar: { groupPadding: 0.000000, pointPadding: 0.100000, borderWidth: 0.000000, colorByPoint: true },
+        series: { label: { enabled: false}, dataLabels: { enabled: true , allowOverlap: true, format: '{point.y:.2f}' } }
+    },
+    series: [
+        { data: [571.071655, 301.035675, 205.185425, 172.923431, 116.004288, 104.612610, 102.219139, 5.993213] }
+    ]
+});
+</script>
+
+<a name='chart_4'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_4' style='width: 800px; height: 540px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_4', {
+    chart: { type: 'line' },
+    title: { text: 'random no exp (fixed len)' },
+    subtitle: { text: 'fixed significant digit count' },
+    credits: { enabled: false },
+    xAxis: { title: { text: 'digit count' }, tickInterval: 1.000000, allowDecimals: true, type: 'linear' },
+    yAxis: { title: { text: 'average CPU cycles' }, allowDecimals: true, type: 'logarithmic' },
+    tooltip: {valueDecimals: 2, shared: true, crosshairs: true, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: true },
+    plotOptions: {
+        line: { pointStart: 1.000000, pointInterval: 1.000000 },
+        series: { label: { enabled: false}, dataLabels: { enabled: false , allowOverlap: true} }
+    },
+    series: [
+        { name: 'libc', data: [291.452271, 345.022369, 373.966553, 404.127716, 426.131134, 441.063873, 456.422974, 474.616333, 485.310791, 516.091431, 541.080017, 560.502563, 577.809326, 597.372803, 615.725098, 632.966675, 652.908508] },
+        { name: 'abseil', data: [244.898743, 249.156097, 254.593811, 257.499359, 260.081421, 263.341309, 265.610962, 268.498962, 271.351196, 274.392761, 275.951050, 279.919617, 280.363495, 284.181152, 287.178131, 290.162567, 297.859253] },
+        { name: 'google', data: [110.014122, 119.349518, 127.451591, 136.095840, 143.161209, 149.712585, 155.557968, 162.585617, 170.728836, 177.850586, 186.833160, 193.316345, 200.097107, 205.661301, 210.140396, 219.634674, 227.651779] },
+        { name: 'david_gay', data: [80.518982, 89.014259, 99.353600, 105.532364, 112.202240, 118.263649, 124.551765, 128.835403, 135.113602, 141.845215, 150.363342, 154.900742, 159.043411, 164.729141, 174.885605, 218.838745, 230.502853] },
+        { name: 'yy', data: [54.786652, 61.897350, 66.353973, 71.652992, 70.825066, 72.758286, 73.977882, 75.788803, 79.453697, 80.405441, 82.915123, 84.157204, 86.315979, 89.120560, 91.814644, 99.653450, 146.582626] },
+        { name: 'lemire', data: [39.265640, 46.075729, 51.435711, 55.817268, 60.859112, 63.934586, 66.893089, 69.703766, 72.644371, 75.959114, 78.681396, 81.582367, 84.984749, 87.822472, 94.275177, 121.975784, 129.219452] },
+        { name: 'yy_fast', data: [45.213131, 53.230625, 59.922604, 63.450329, 65.519951, 67.749977, 69.432877, 71.333328, 71.948654, 73.191490, 74.782570, 77.948341, 78.974007, 80.530792, 82.691856, 83.123154, 85.686180] },
+        { name: 'null', data: [4.995741, 4.994979, 4.994979, 4.995741, 4.994979, 4.995360, 4.995741, 4.995741, 4.995741, 4.995741, 4.995741, 4.995360, 4.995741, 4.995360, 4.995360, 4.995741, 4.995741] }
+    ]
+});
+</script>
+
+<a name='chart_5'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_5' style='width: 640px; height: 420px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_5', {
+    chart: { type: 'bar' },
+    title: { text: 'normalized (random len)' },
+    subtitle: { text: 'random significant digit count (1-17)' },
+    credits: { enabled: false },
+    xAxis: { allowDecimals: true, categories: ['libc', 'abseil', 'google', 'david_gay', 'yy', 'lemire', 'yy_fast', 'null'], type: 'linear' },
+    yAxis: { title: { text: 'CPU cycles' }, allowDecimals: true, type: 'linear' },
+    tooltip: {valueDecimals: 2, shared: false, crosshairs: false, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: false },
+    plotOptions: {
+        bar: { groupPadding: 0.000000, pointPadding: 0.100000, borderWidth: 0.000000, colorByPoint: true },
+        series: { label: { enabled: false}, dataLabels: { enabled: true , allowOverlap: true, format: '{point.y:.2f}' } }
+    },
+    series: [
+        { data: [614.651428, 282.846497, 177.495865, 160.163559, 86.288925, 75.786896, 71.352379, 5.992832] }
+    ]
+});
+</script>
+
+<a name='chart_6'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_6' style='width: 800px; height: 540px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_6', {
+    chart: { type: 'line' },
+    title: { text: 'normalized (fixed len)' },
+    subtitle: { text: 'fixed significant digit count' },
+    credits: { enabled: false },
+    xAxis: { title: { text: 'digit count' }, tickInterval: 1.000000, allowDecimals: true, type: 'linear' },
+    yAxis: { title: { text: 'average CPU cycles' }, allowDecimals: true, type: 'logarithmic' },
+    tooltip: {valueDecimals: 2, shared: true, crosshairs: true, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: true },
+    plotOptions: {
+        line: { pointStart: 1.000000, pointInterval: 1.000000 },
+        series: { label: { enabled: false}, dataLabels: { enabled: false , allowOverlap: true} }
+    },
+    series: [
+        { name: 'libc', data: [374.579987, 403.804993, 393.566254, 447.659851, 465.982391, 455.255188, 472.842773, 494.978394, 487.935516, 658.534058, 643.522461, 636.584717, 661.121826, 700.360413, 704.600647, 681.090698, 742.820801] },
+        { name: 'abseil', data: [247.305939, 248.503052, 250.278931, 252.092514, 255.333344, 256.932800, 258.984528, 260.755798, 263.118805, 265.238342, 267.106781, 269.699524, 271.511200, 273.501587, 275.422211, 278.447784, 279.673859] },
+        { name: 'google', data: [90.198425, 102.539948, 110.219109, 117.660904, 124.111320, 129.413773, 138.261856, 144.865433, 152.543457, 157.533859, 166.341568, 173.623718, 180.321411, 187.627182, 192.358505, 201.312515, 206.891953] },
+        { name: 'david_gay', data: [64.010025, 76.833138, 84.766052, 93.955132, 100.449371, 108.447815, 115.832077, 122.351074, 129.365768, 136.117554, 144.903152, 152.590698, 161.473831, 169.429993, 184.312057, 225.330704, 237.794144] },
+        { name: 'yy', data: [34.063393, 38.437714, 39.828384, 42.267200, 43.364494, 45.363247, 47.316662, 48.700092, 50.868011, 51.760326, 53.576958, 55.306725, 56.634144, 58.943798, 60.356567, 66.349014, 119.069473] },
+        { name: 'lemire', data: [25.024426, 27.030037, 29.046698, 32.091690, 34.070633, 37.039806, 39.294598, 43.082932, 47.209980, 51.015842, 53.055744, 57.008675, 66.009163, 61.088478, 63.045704, 69.113213, 80.322388] },
+        { name: 'yy_fast', data: [25.163492, 30.921244, 32.188469, 34.940086, 35.891075, 36.990276, 38.719276, 40.843384, 42.455795, 43.742451, 46.176693, 47.740341, 48.997276, 50.711418, 52.745987, 53.886715, 55.724304] },
+        { name: 'null', data: [4.994979, 4.994598, 4.994979, 4.996503, 4.994979, 4.997646, 4.994979, 4.994979, 4.995360, 4.995360, 4.994979, 4.995360, 4.994979, 4.995741, 4.995741, 4.995741, 4.996503] }
+    ]
+});
+</script>
+
+<a name='chart_7'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_7' style='width: 640px; height: 420px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_7', {
+    chart: { type: 'bar' },
+    title: { text: 'integer (random len)' },
+    subtitle: { text: 'random significant digit count (1-17)' },
+    credits: { enabled: false },
+    xAxis: { allowDecimals: true, categories: ['libc', 'abseil', 'google', 'lemire', 'david_gay', 'yy', 'yy_fast', 'null'], type: 'linear' },
+    yAxis: { title: { text: 'CPU cycles' }, allowDecimals: true, type: 'linear' },
+    tooltip: {valueDecimals: 2, shared: false, crosshairs: false, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: false },
+    plotOptions: {
+        bar: { groupPadding: 0.000000, pointPadding: 0.100000, borderWidth: 0.000000, colorByPoint: true },
+        series: { label: { enabled: false}, dataLabels: { enabled: true , allowOverlap: true, format: '{point.y:.2f}' } }
+    },
+    series: [
+        { data: [319.882874, 268.445648, 174.114838, 118.713234, 114.220039, 91.482033, 73.892540, 5.993213] }
+    ]
+});
+</script>
+
+<a name='chart_8'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_8' style='width: 800px; height: 540px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_8', {
+    chart: { type: 'line' },
+    title: { text: 'integer (fixed len)' },
+    subtitle: { text: 'fixed significant digit count' },
+    credits: { enabled: false },
+    xAxis: { title: { text: 'digit count' }, tickInterval: 1.000000, allowDecimals: true, type: 'linear' },
+    yAxis: { title: { text: 'average CPU cycles' }, allowDecimals: true, type: 'logarithmic' },
+    tooltip: {valueDecimals: 2, shared: true, crosshairs: true, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: true },
+    plotOptions: {
+        line: { pointStart: 1.000000, pointInterval: 1.000000 },
+        series: { label: { enabled: false}, dataLabels: { enabled: false , allowOverlap: true} }
+    },
+    series: [
+        { name: 'libc', data: [159.498322, 174.587280, 183.700928, 195.558182, 208.730682, 216.813705, 228.325409, 235.392670, 245.858124, 290.623199, 292.298096, 301.450989, 311.384552, 332.151611, 340.344757, 372.608276, 420.123444] },
+        { name: 'abseil', data: [237.229492, 239.141754, 241.142426, 243.248993, 245.326996, 247.504440, 249.287933, 251.348022, 253.221802, 255.264374, 257.085571, 259.014984, 261.317017, 262.886383, 265.036774, 282.861725, 319.446228] },
+        { name: 'google', data: [94.010765, 103.990433, 109.986313, 118.982224, 123.985207, 130.981232, 136.984344, 142.004471, 148.979156, 154.985703, 160.978912, 163.977036, 171.988434, 177.985840, 184.983765, 190.991837, 196.979340] },
+        { name: 'david_gay', data: [59.997662, 66.759361, 69.463356, 72.392906, 74.328789, 75.598679, 78.040161, 81.989662, 84.658607, 86.294640, 87.920776, 90.283768, 91.986099, 94.596748, 96.138298, 120.481102, 148.389740] },
+        { name: 'lemire', data: [25.017567, 28.035130, 30.047218, 33.039253, 36.031284, 38.038040, 41.963158, 42.080505, 44.085739, 48.052383, 50.047707, 52.070084, 54.085983, 56.090450, 111.541954, 470.606262, 310.281158] },
+        { name: 'yy', data: [38.027752, 37.032570, 41.051029, 42.046978, 41.582912, 43.130558, 44.975002, 47.148640, 53.108322, 52.292591, 52.150856, 53.156330, 58.074345, 59.084770, 62.079853, 111.535858, 135.818466] },
+        { name: 'yy_fast', data: [25.001945, 26.903162, 28.018364, 29.076797, 31.082027, 30.896860, 32.934093, 34.851692, 36.526974, 38.632790, 42.194046, 44.189751, 45.213131, 46.350433, 48.295082, 52.156952, 54.146561] },
+        { name: 'null', data: [4.999170, 4.995360, 4.995741, 4.995360, 4.994979, 4.995360, 4.995360, 4.995741, 4.994979, 4.994979, 4.994979, 4.994979, 4.995360, 4.995360, 4.995360, 4.995360, 4.994979] }
+    ]
+});
+</script>
+
+</body>
+</html>
