@@ -55,44 +55,94 @@ This benchmark project uses `cpu cycle` for measurement, so `Turbo Boost` and si
 - Linux: https://askubuntu.com/a/619881
 
 
----
 # Functions
+
+-------
+
 ### Integer to String (itoa)
-
+Function prototype:
 ```c
-// Function prototype:
-// Write integer to buffer, returns the ending pointer.
-// The buffer should large enough to store all available integer.
-// Null-terminator is not required.
-
 char *itoa_u32(uint32_t val, char *buf);
 char *itoa_i32(int32_t val, char *buf);
 char *itoa_u64(uint64_t val, char *buf);
 char *itoa_i64(int64_t val, char *buf);
 ```
-
-There are two benchmark cases:
-
-1. Sequential: each set of input value has a fixed decimal digit count.
-This case ensures that the value is predictable, 
-such as line numbers, user IDs and auto-increment sequence. 
-
-2. Random: the input data has a random decimal digit count.
-This case ensures that the value is unpredictable.
+![img](docs/images/itoa-u64-fixed-length.png)
+![img](docs/images/itoa-u64-random-length.png)
 
 Click these links to see more reports with interactive charts:
+* [Intel NUC 8i5 clang](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_clang_itoa.html)
+* [Intel NUC 8i5 gcc](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_gcc_itoa.html)
+* [Intel NUC 8i5 msvc](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_msvc_itoa.html)
+* [Apple A12 clang](https://ibireme.github.io/c_numconv_benchmark/reports/Apple_A12_itoa.html)
 
+-------
 
 ### String to Integer (atoi)
+Function prototype:
+```c
+// Function prototype:
+typedef enum {
+    atoi_result_suc = 0,
+    atoi_result_fail = 1,
+    atoi_result_overflow = 2,
+} atoi_result;
 
+uint32_t atoi_u32(const char *str, size_t len, char **endptr, atoi_result *res);
+int32_t atoi_i32(const char *str, size_t len, char **endptr, atoi_result *res);
+uint64_t atoi_u64(const char *str, size_t len, char **endptr, atoi_result *res);
+int64_t atoi_i64(const char *str, size_t len, char **endptr, atoi_result *res);
+```
+
+![img](docs/images/atoi-u64-fixed-length.png)
+![img](docs/images/atoi-u64-random-length.png)
+
+Click these links to see more reports with interactive charts:
+* [Intel NUC 8i5 clang](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_clang_atoi.html)
+* [Intel NUC 8i5 gcc](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_gcc_atoi.html)
+* [Intel NUC 8i5 msvc](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_msvc_atoi.html)
+* [Apple A12 clang](https://ibireme.github.io/c_numconv_benchmark/reports/Apple_A12_atoi.html)
+
+-------
 
 ### Double to String (dtoa)
+Function prototype:
+```c
+// Function prototype:
+char *dtoa(double val, char *buf);
+```
+![img](docs/images/dtoa-random-fixed-len.png)
+![img](docs/images/dtoa-nomalized-fixed-len.png)
+![img](docs/images/dtoa-integer-fixed-len.png)
+
+Click these links to see more reports with interactive charts:
+* [Intel NUC 8i5 clang](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_clang_dtoa.html)
+* [Intel NUC 8i5 gcc](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_gcc_dtoa.html)
+* [Intel NUC 8i5 msvc](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_msvc_dtoa.html)
+* [Apple A12 clang](https://ibireme.github.io/c_numconv_benchmark/reports/Apple_A12_dtoa.html)
+
+-------
 
 ### String to Double (strtod)
+Function prototype:
+```c
+// Function prototype:
+double strtod(const char *str, size_t len, char **endptr);
+```
+![img](docs/images/strtod-random-fixed-len.png)
+![img](docs/images/strtod-normalized-fixed-len.png)
+![img](docs/images/strtod-integer-fixed-len.png)
 
 
+Click these links to see more reports with interactive charts:
+* [Intel NUC 8i5 clang](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_clang_strtod.html)
+* [Intel NUC 8i5 gcc](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_gcc_strtod.html)
+* [Intel NUC 8i5 msvc](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_msvc_strtod.html)
+* [Apple A12 clang](https://ibireme.github.io/c_numconv_benchmark/reports/Apple_A12_strtod.html)
 
----
+
+-------
+
 # Referenced libraries and articles
 
 **google (double<->string)**
