@@ -1,0 +1,198 @@
+cmake_minimum_required(VERSION 3.14)
+
+project(c_numconv_benchmark)
+
+# ------------------------------------------------------------------------------
+# build type
+if(XCODE OR MSVC)
+    set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
+endif()
+if(NOT CMAKE_BUILD_TYPE)
+    message(STATUS "No build type selected, default to: Release")
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
+if(MSVC)
+    string(APPEND CMAKE_CXX_FLAGS " /Zc:__cplusplus")
+endif()
+
+if (CMAKE_BUILD_TYPE MATCHES "Release")
+    include(CheckCXXCompilerFlag)
+    CHECK_CXX_COMPILER_FLAG("-march=native" COMPILER_SUPPORT_NATIVE_ARCH)
+    if (COMPILER_SUPPORT_NATIVE_ARCH)
+        message("Add -march=native flag")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+    endif()
+endif()
+
+# ------------------------------------------------------------------------------
+# vendor
+set(vendors "")
+
+# abseil
+add_subdirectory(vendor/abseil-cpp)
+list(APPEND vendors "absl_strings")
+
+# fmt
+add_subdirectory(vendor/fmt)
+list(APPEND vendors "fmt")
+
+# google double conversion
+add_subdirectory(vendor/double-conversion)
+list(APPEND vendors "double-conversion")
+
+# lemire fast double parser (header only)
+add_library(fast_double_parser INTERFACE)
+target_include_directories(fast_double_parser INTERFACE "vendor/fast_double_parser/include")
+list(APPEND vendors "fast_double_parser")
+
+# dragonbox
+add_subdirectory(vendor/dragonbox)
+list(APPEND vendors "dragonbox_to_chars")
+
+# grisu-exact
+add_library(grisu_exact STATIC
+    "vendor/Grisu-Exact/grisu_exact.h"    
+    "vendor/Grisu-Exact/fp_to_chars.h"
+    "vendor/Grisu-Exact/fp_to_chars/fp_to_chars.cpp"
+)
+target_include_directories(grisu_exact INTERFACE "vendor/Grisu-Exact")
+list(APPEND vendors "grisu_exact")
+
+# schubfach
+file(GLOB SOURCES "vendor/Drachennest/src/*.cc" "vendor/Drachennest/src/*.h")
+add_library(schubfach STATIC ${SOURCES})
+target_include_directories(schubfach INTERFACE "vendor/Drachennest/src")
+list(APPEND vendors "schubfach")
+
+# erthink (header only)
+add_library(erthink INTERFACE)
+target_include_directories(erthink INTERFACE "vendor/erthink")
+list(APPEND vendors "erthink")
+
+# ryu
+if(NOT MSVC)
+    file(GLOB SOURCES 
+        "vendor/ryu/ryu/*.h"
+        "vendor/ryu/ryu/*.c"
+    )
+    add_library(ryu STATIC ${SOURCES})
+    target_include_directories(ryu PUBLIC "vendor/ryu")
+    list(APPEND vendors "ryu")
+endif()
+
+# david gay
+add_library(david_gay STATIC 
+    "vendor/david_gay/david_gay_dtoa.h"
+    "vendor/david_gay/david_gay_dtoa.c"
+)
+target_include_directories(david_gay PUBLIC "vendor/david_gay")
+list(APPEND vendors "david_gay")
+
+# swift dtoa
+add_library(swift_dtoa STATIC 
+    "vendor/swift_dtoa/SwiftDtoa.h"
+    "vendor/swift_dtoa/SwiftDtoa.cpp"
+)
+target_include_directories(swift_dtoa PUBLIC "vendor/swift_dtoa")
+list(APPEND vendors "swift_dtoa")
+
+# yy_test_utils
+add_library(yy_test_utils STATIC 
+    "vendor/yy_test_utils/yy_test_utils.h"
+    "vendor/yy_test_utils/yy_test_utils.c"
+)
+target_include_directories(yy_test_utils PUBLIC "vendor/yy_test_utils")
+list(APPEND vendors "yy_test_utils")
+
+
+# ------------------------------------------------------------------------------
+# runs
+set(run_names "itoa" "dtoa" "atoi" "strtod")
+foreach(run_name ${run_names})
+
+    # create exe
+    add_executable("run_${run_name}" "")
+
+    # add source files
+    file(GLOB SOURCES 
+        "src/${run_name}/*.h"
+        "src/${run_name}/*.c" 
+        "src/${run_name}/*.cpp"
+    )
+    if(IOS)
+        set(INFO_PLIST_BUNDLE_ID "com.benchmark.${run_name}")
+        configure_file(
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/main/ios/Info.plist"
+            "${CMAKE_CURRENT_BINARY_DIR}/Info_${run_name}.plist"
+            @ONLY
+        )
+        unset(INFO_PLIST_BUNDLE_ID)
+        list(APPEND SOURCES
+            "src/main/ios/main.m"    
+            "src/main/ios/LaunchScreen.storyboard"
+            "${CMAKE_CURRENT_BINARY_DIR}/Info_${run_name}.plist"
+        )
+    else()
+        list(APPEND SOURCES "src/main/console/main.c")
+    endif()
+    target_sources("run_${run_name}" PRIVATE ${SOURCES})
+    target_include_directories("run_${run_name}" PRIVATE "src/${run_name}")
+
+    # add links
+    if(IOS)
+        find_library(libUIKit UIKit)
+        find_library(libWebKit WebKit)
+        target_link_libraries("run_${run_name}" ${libUIKit} ${libWebKit})
+        set_target_properties("run_${run_name}" PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_BINARY_DIR}/Info_${run_name}.plist")
+        set_target_properties("run_${run_name}" PROPERTIES RESOURCE "${CMAKE_CURRENT_BINARY_DIR}/data")
+    endif()
+    target_link_libraries("run_${run_name}" PRIVATE ${vendors})
+
+endforeach()
+
+# config project
+if(MSVC)
+    if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+        string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    else()
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+    endif()
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    add_definitions(-DBENCHMARK_DATA_PATH="${CMAKE_CURRENT_BINARY_DIR}")
+
+elseif(XCODE)
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+    include(XcodeProperty)
+
+    
+    foreach(run_name ${run_names})
+        set_default_xcode_property("run_${run_name}")
+        set_xcode_deployment_version("run_${run_name}" "10.11" "9.0" "9.0" "2.0")
+        set_xcode_language_standard("run_${run_name}" "gnu11" "gnu++17")
+        if(NOT IOS)
+            set_xcode_property("run_${run_name}" OTHER_CFLAGS[variant=Debug] -DBENCHMARK_DATA_PATH="\\\\\"${CMAKE_CURRENT_BINARY_DIR}\\\\\"")
+            set_xcode_property("run_${run_name}" OTHER_CFLAGS[variant=Release] -DBENCHMARK_DATA_PATH="\\\\\"${CMAKE_CURRENT_BINARY_DIR}\\\\\"")
+        endif()
+    endforeach()
+
+    foreach(vendor ${vendors})
+        get_property(vendor_type TARGET ${vendor} PROPERTY TYPE)
+        if(NOT vendor_type STREQUAL "INTERFACE_LIBRARY")
+            set_default_xcode_property(${vendor})
+            set_xcode_deployment_version(${vendor} "10.11" "9.0" "9.0" "2.0")
+            set_xcode_language_standard(${vendor} "gnu11" "gnu++17")
+        endif()
+    endforeach()
+
+else()
+    add_definitions(-DBENCHMARK_DATA_PATH="${CMAKE_CURRENT_BINARY_DIR}")
+endif()
+
+# copy test data
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+
