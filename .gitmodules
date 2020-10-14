@@ -22,3 +22,6 @@
 [submodule "vendor/erthink"]
 	path = vendor/erthink
 	url = https://github.com/erthink/erthink.git
+[submodule "vendor/double-conversion"]
+	path = vendor/double-conversion
+	url = https://github.com/google/double-conversion.git
