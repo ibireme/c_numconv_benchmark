@@ -1,9 +1,6 @@
 [submodule "vendor/ryu"]
 	path = vendor/ryu
 	url = https://github.com/ulfjack/ryu.git
-[submodule "vendor/double-conversion"]
-	path = vendor/double-conversion
-	url = https://github.com/google/double-conversion.git
 [submodule "vendor/abseil-cpp"]
 	path = vendor/abseil-cpp
 	url = https://github.com/abseil/abseil-cpp.git

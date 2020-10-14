@@ -1,9 +1,7 @@
 # Number Conversion Benchmark in C
-Benchmark algorithm for converting between numbers and strings in C/C++
 This project evaluates the performance of functions that convert numbers to and from strings in C/C++.
 
-The functions named `yy` is implemented or modified by me, and used in the [yyjson](https://github.com/ibireme/yyjson) library.
-
+The functions named `yy` is implemented or rewritten by me, and used in the [yyjson](https://github.com/ibireme/yyjson) library.
 
 # Requirement
 
@@ -48,8 +46,9 @@ cmake .. -G Xcode
 cmake .. -G Xcode -DCMAKE_SYSTEM_NAME=iOS
 ```
 
-# Make the results more stable and accurate
-`Turbo Boost` and similar technologies should be disabled to make the result more stable and accurate:
+## Make the results more stable and accurate
+
+This benchmark project uses `cpu cycle` for measurement, so `Turbo Boost` and similar technologies should be disabled to make the result more stable and accurate:
 
 - Windows: https://www.tautvidas.com/blog/2011/04/disabling-intel-turbo-boost/
 - macOS: http://tbswitcher.rugarciap.com/
