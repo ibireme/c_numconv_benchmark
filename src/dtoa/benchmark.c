@@ -54,16 +54,28 @@ static yy_inline f32 f32_from_u32_raw(u32 u) {
 
 /** Get the number of significant digit from a valid floating number string. */
 static yy_inline int f64_str_get_digits(const char *str) {
-    const char *cur = str, *dot = NULL, *hdr = NULL, *end = NULL;
-    for (; *cur && *cur != 'e' && *cur != 'E' ; cur++) {
-        if (*cur == '.') dot = cur;
-        else if ('0' < *cur && *cur <= '9') {
-            if (!hdr) hdr = cur;
-            end = cur;
+    const char *hdr = str;
+    if (*hdr == '-' || *hdr == '+') hdr++;
+    
+    const char *cur = hdr;
+    const char *dot = NULL;
+    bool has_frac = 0;
+    while('0' <= *cur && *cur <= '9') cur++;
+    if (*cur == '.') {
+        dot = cur;
+        cur++;
+        while('0' <= *cur && *cur <= '9') {
+            has_frac |= (*cur != '0');
+            cur++;
         }
     }
-    if (!hdr) return 0;
-    return (int)((end - hdr + 1) - (hdr < dot && dot < end));
+    const char *end = cur;
+    
+    while (hdr < end && (*hdr == '0' || *hdr == '.')) hdr++;
+    if (!has_frac) {
+        while (hdr < end && ((*(end - 1) == '0') || *(end - 1) == '.')) end--;
+    }
+    return (int)(end - hdr) - (hdr < dot && dot < end);
 }
 
 /*----------------------------------------------------------------------------*/
