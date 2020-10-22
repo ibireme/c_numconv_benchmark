@@ -76,6 +76,9 @@ Click these links to see more reports with interactive charts:
 * [Intel NUC 8i5 msvc](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_msvc_itoa.html)
 * [Apple A12 clang](https://ibireme.github.io/c_numconv_benchmark/reports/Apple_A12_itoa.html)
 
+Note:
+* The `yyjson_large_lut` uses a large look-up table, and may not be suitable for common cases.
+
 -------
 
 ### String to Integer (atoi)
@@ -121,6 +124,13 @@ Click these links to see more reports with interactive charts:
 * [Intel NUC 8i5 msvc](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_msvc_dtoa.html)
 * [Apple A12 clang](https://ibireme.github.io/c_numconv_benchmark/reports/Apple_A12_dtoa.html)
 
+Note: the following functions may not generate shortest decimal representation, or may not remove the trailing zeros in fraction part:
+* fpconv
+* milo
+* emyg
+* schubfach
+* erthink
+
 -------
 
 ### String to Double (strtod)
@@ -140,6 +150,7 @@ Click these links to see more reports with interactive charts:
 * [Intel NUC 8i5 msvc](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_msvc_strtod.html)
 * [Apple A12 clang](https://ibireme.github.io/c_numconv_benchmark/reports/Apple_A12_strtod.html)
 
+Note: `yy_fast` may returns inaccurate result with 0-2 ulp error in some cases.
 
 -------
 
