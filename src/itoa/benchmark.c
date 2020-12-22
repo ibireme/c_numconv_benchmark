@@ -3,7 +3,7 @@
  * Released under the MIT license (MIT).
  */
 
-#include "yy_test_utils.h"
+#include "yybench.h"
 
 #ifndef BENCHMARK_DATA_PATH
 extern const char *benchmark_get_data_path(void);

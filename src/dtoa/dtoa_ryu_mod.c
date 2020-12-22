@@ -1,5 +1,5 @@
 /*
- Code from https://github.com/ibireme/yyjson
+ A modified version of ryu by ibireme
  */
 
 #include <stdlib.h>
@@ -1533,7 +1533,7 @@ static_inline void f64_to_dec(u64 sig_raw, u32 exp_raw,
 }
 
 /** Write a double number (require 32 bytes). no null-terminated */
-static_inline u8 *ryu_yy_imp(u8 *buf, u64 raw) {
+static_inline u8 *ryu_mod_imp(u8 *buf, u64 raw) {
     u64 sig; /* significand in decimal */
     i32 exp; /* exponent in decimal */
     i32 sig_len; /* significand digit count */
@@ -1621,8 +1621,8 @@ static_inline u8 *ryu_yy_imp(u8 *buf, u64 raw) {
     }
 }
 
-char *dtoa_ryu_yy(double val, char *buf) {
-    char *end = (char *)ryu_yy_imp((u8 *)buf, f64_to_raw(val));
+char *dtoa_ryu_mod(double val, char *buf) {
+    char *end = (char *)ryu_mod_imp((u8 *)buf, f64_to_raw(val));
     *end = '\0';
     return end;;
 }

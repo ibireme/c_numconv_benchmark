@@ -1,6 +1,6 @@
 #include "benchmark_helper.h"
 #include "double-conversion/double-conversion.h"
-#include "yy_test_utils.h"
+#include "yybench.h"
 #include <inttypes.h>
 
 using namespace double_conversion;

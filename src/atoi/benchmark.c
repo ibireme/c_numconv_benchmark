@@ -3,7 +3,7 @@
  * Released under the MIT license (MIT).
  */
 #include "benchmark.h"
-#include "yy_test_utils.h"
+#include "yybench.h"
 #include <inttypes.h>
 
 #ifndef BENCHMARK_DATA_PATH

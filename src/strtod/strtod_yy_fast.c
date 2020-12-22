@@ -1,7 +1,7 @@
 /*
- Code from https://github.com/ibireme/yyjson
+ A fast but inaccurate (0-2 ulp error) method to read double by ibireme.
  */
- 
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -82,6 +82,15 @@
         ((__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) >= \
         (major * 10000 + minor * 100 + patch))
 #endif
+
+/* real gcc check */
+#ifndef yy_is_real_gcc
+#   if !defined(__clang__) && !defined(__INTEL_COMPILER) && !defined(__ICC) && \
+defined(__GNUC__) && defined(__GNUC_MINOR__)
+#       define yy_is_real_gcc 1
+#   endif
+#endif
+
 
 /* msvc intrinsic */
 #if _MSC_VER >= 1400
@@ -363,11 +372,6 @@ static_inline u32 u64_tz_bits(u64 v) {
 #endif
 }
 
-/** Returns the number of significant bits in value (should not be 0). */
-static_inline u32 u64_sig_bits(u64 v) {
-    return (u32)64 - u64_lz_bits(v) - u64_tz_bits(v);
-}
-
 
 
 /*==============================================================================
@@ -557,10 +561,25 @@ double strtod_yy_fast(const char *str, size_t len, char **end) {
     /* begin with non-zero digit,  */
     sig = (u64)(*cur - '0');
     
-    /* read integral part */
+    /*
+     Read integral part, same as the following code.
+     For more explanation, see the comments under label `skip_ascii_begin`.
+     
+         for (int i = 1; i <= 18; i++) {
+            num = cur[i] - '0';
+            if (num <= 9) sig = num + sig * 10;
+            else goto digi_sepr_i;
+         }
+     */
+#if yy_is_real_gcc
 #define expr_intg(i) \
     if (likely((num = (u64)(cur[i] - (u8)'0')) <= 9)) sig = num + sig * 10; \
-    else goto digi_sepr_##i;
+    else { __asm volatile("":"=m"(cur[i])::); goto digi_sepr_##i; }
+#else
+#define expr_intg(i) \
+    if (likely((num = (u64)(cur[i] - (u8)'0')) <= 9)) sig = num + sig * 10; \
+    else { goto digi_sepr_##i; }
+#endif
     repeat_in_1_18(expr_intg);
 #undef expr_intg
     
@@ -579,11 +598,19 @@ double strtod_yy_fast(const char *str, size_t len, char **end) {
 #undef expr_sepr
     
     /* read fraction part */
+#if yy_is_real_gcc
 #define expr_frac(i) \
     digi_frac_##i: \
     if (likely((num = (u64)(cur[i + 1] - (u8)'0')) <= 9)) \
         sig = num + sig * 10; \
-    else goto digi_stop_##i;
+    else { __asm volatile("":"=m"(cur[i + 1])::); goto digi_stop_##i; }
+#else
+#define expr_frac(i) \
+    digi_frac_##i: \
+    if (likely((num = (u64)(cur[i + 1] - (u8)'0')) <= 9)) \
+        sig = num + sig * 10; \
+    else { goto digi_stop_##i; }
+#endif
     repeat_in_1_18(expr_frac)
 #undef expr_frac
     

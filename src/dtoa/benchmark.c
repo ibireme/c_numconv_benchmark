@@ -4,7 +4,7 @@
  */
 
 #include "benchmark_helper.h"
-#include "yy_test_utils.h"
+#include "yybench.h"
 #include <inttypes.h>
 
 #ifndef BENCHMARK_DATA_PATH
@@ -266,12 +266,12 @@ static void dtoa_func_benchmark_all(const char *output_path) {
         rand_f64, false
     };
     dataset_arr[dataset_num++] = (dataset_t) {
-        "random (random len)",
+        "random length",
         "random double number with random significant digit count",
         rand_f64_len, true, true
     };
     dataset_arr[dataset_num++] = (dataset_t) {
-        "random (fixed len)",
+        "fixed length",
         "random double number with fixed significant digit count",
         rand_f64_len, true, false
     };
@@ -581,12 +581,13 @@ static void dtoa_func_register_all(void) {
     dtoa_func_register(emyg)
     dtoa_func_register(ryu)
 #endif
-    dtoa_func_register(ryu_yy)
     dtoa_func_register(grisu3)
     dtoa_func_register(schubfach)
     dtoa_func_register(erthink)
     dtoa_func_register(grisu_exact)
     dtoa_func_register(dragonbox)
+    dtoa_func_register(ryu_mod)
+    dtoa_func_register(yy)
     // dtoa_func_register(printf) // not shortest, too slow
 }
 

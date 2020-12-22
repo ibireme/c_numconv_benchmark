@@ -103,13 +103,17 @@ add_library(swift_dtoa STATIC
 target_include_directories(swift_dtoa PUBLIC "vendor/swift_dtoa")
 list(APPEND vendors "swift_dtoa")
 
-# yy_test_utils
-add_library(yy_test_utils STATIC 
-    "vendor/yy_test_utils/yy_test_utils.h"
-    "vendor/yy_test_utils/yy_test_utils.c"
+# yy_double
+add_library(yy_double STATIC 
+    "vendor/yy_double/yy_double.h"
+    "vendor/yy_double/yy_double.c"
 )
-target_include_directories(yy_test_utils PUBLIC "vendor/yy_test_utils")
-list(APPEND vendors "yy_test_utils")
+target_include_directories(swift_dtoa PUBLIC "vendor/yy_double")
+list(APPEND vendors "yy_double")
+
+# yybench
+add_subdirectory(vendor/yybench)
+list(APPEND vendors "yybench")
 
 
 # ------------------------------------------------------------------------------

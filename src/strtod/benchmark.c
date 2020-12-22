@@ -4,7 +4,7 @@
  */
 
 #include "benchmark_helper.h"
-#include "yy_test_utils.h"
+#include "yybench.h"
 #include <inttypes.h>
 #include <fenv.h>
 
@@ -45,20 +45,6 @@ static yy_inline f64 f64_from_u64_raw(u64 u) {
     f64_uni uni;
     uni.u = u;
     return uni.f;
-}
-
-/** Get the number of significant digit from a valid floating number string. */
-static yy_inline int f64_str_get_digits(const char *str) {
-    const char *cur = str, *dot = NULL, *hdr = NULL, *end = NULL;
-    for (; *cur && *cur != 'e' && *cur != 'E' ; cur++) {
-        if (*cur == '.') dot = cur;
-        else if ('0' < *cur && *cur <= '9') {
-            if (!hdr) hdr = cur;
-            end = cur;
-        }
-    }
-    if (!hdr) return 0;
-    return (int)((end - hdr + 1) - (hdr < dot && dot < end));
 }
 
 
@@ -270,6 +256,26 @@ static void fill_double_no_exp_fix_len(char *buf, int count, int len) {
     }
 }
 
+static void fill_nomalized(char *buf, int count) {
+    for (int i = 0; i < count; i++) {
+        char *s = buf + i * NUM_STR_LEN_MAX;
+        
+        f64 val = (f64)yy_random64() / (f64)UINT64_MAX;
+        val = (yy_random32() & 1) ? -val : val;
+        google_double_to_string(val, s);
+    }
+}
+
+static void fill_nomalized_f32(char *buf, int count) {
+    for (int i = 0; i < count; i++) {
+        char *s = buf + i * NUM_STR_LEN_MAX;
+        
+        f64 val = (f64)yy_random64() / (f64)UINT64_MAX;
+        val = (yy_random32() & 1) ? -val : val;
+        google_double_to_string((f32)val, s);
+    }
+}
+
 static void fill_nomalized_rnd_len(char *buf, int count) {
     for (int i = 0; i < count; i++) {
         char *s = buf + i * NUM_STR_LEN_MAX;
@@ -350,32 +356,42 @@ static void strtod_func_benchmark_all(const char *output_path) {
         fill_double, false
     };
     dataset_arr[dataset_num++] = (dataset_t) {
-        "random (random len)",
+        "random length",
         "random significant digit count (1-17)",
         fill_double_rnd_len, false
     };
     dataset_arr[dataset_num++] = (dataset_t) {
-        "random (fixed len)",
+        "fixed length",
         "fixed significant digit count",
         fill_double_fix_len, true, 1, 17
     };
     dataset_arr[dataset_num++] = (dataset_t) {
-        "random no exp (random len)",
+        "random length without exponent",
         "random significant digit count (1-17)",
         fill_double_no_exp_rnd_len, false
     };
     dataset_arr[dataset_num++] = (dataset_t) {
-        "random no exp (fixed len)",
+        "fixed length without exponent",
         "fixed significant digit count",
         fill_double_no_exp_fix_len, true, 1, 17
     };
     dataset_arr[dataset_num++] = (dataset_t) {
-        "normalized (random len)",
-        "random significant digit count (1-17)",
+        "random normalized",
+        "random double number in range 0.0-1.0",
+        fill_nomalized, false
+    };
+    dataset_arr[dataset_num++] = (dataset_t) {
+        "random normalized (float)",
+        "random float number in range 0.0-1.0",
+        fill_nomalized_f32, false
+    };
+    dataset_arr[dataset_num++] = (dataset_t) {
+        "random length normalized",
+        "random significant digit count in range 0.0-1.0",
         fill_nomalized_rnd_len, false
     };
     dataset_arr[dataset_num++] = (dataset_t) {
-        "normalized (fixed len)",
+        "fixed length normalized",
         "fixed significant digit count",
         fill_nomalized_fix_len, true, 1, 17
     };
