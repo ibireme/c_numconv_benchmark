@@ -8,9 +8,42 @@
 <script src='https://cdnjs.cloudflare.com/ajax/libs/highcharts/8.2.0/modules/exporting.min.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/highcharts/8.2.0/modules/export-data.min.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/highcharts/8.2.0/modules/offline-exporting.min.js'></script>
-<link rel='stylesheet' type='text/css' href='https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.0/css/bulma.min.css'>
-<style type='text/css'> hr { height: 1px; margin: 5px 0; background-color: #999999; } </style>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/sortable/0.8.0/js/sortable.min.js'></script>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.0/css/bulma.min.css' />
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/sortable/0.8.0/css/sortable-theme-minimal.min.css' />
+<style type='text/css'>
+hr {
+    height: 1px;
+    margin: 5px 0; 
+    background-color: #999999; 
+}
+.table thead {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+.highcharts-data-table table, th, td { 
+    border: 1px solid gray;
+    padding: 2pt;
+}
+.highcharts-data-table table {
+    margin: auto;
+}
+table .number { 
+    align-items: initial;
+    border-radius: initial;
+    display: table-cell;
+    font-size: initial;
+    height: initial;
+    justify-content: initial;
+    margin-right: initial;
+    min-width: initial;
+    padding: 2pt;
+    vertical-align: initial;
+    text-align: initial;
+    background-color: initial;
+}
+</style>
 </head>
+
 <body>
 <nav class='navbar is-light is-fixed-top' role='navigation' aria-label='main navigation'>
     <div class='navbar-brand'>
@@ -27,10 +60,10 @@
             <div class='navbar-item has-dropdown is-hoverable'>
                 <a class='navbar-link'>Info</a>
                 <div class='navbar-dropdown'>
-                    <a class='navbar-item'>Compiler: Clang 12.0.0 (Apple version)</a>
-                    <a class='navbar-item'>OS: macOS 64-bit</a>
-                    <a class='navbar-item'>CPU: Apple processor</a>
-                    <a class='navbar-item'>CPU Frequency: 2495.26 MHz</a>
+                    <a class='navbar-item'>Compiler: GCC 9.3.0</a>
+                    <a class='navbar-item'>OS: Linux 64-bit</a>
+                    <a class='navbar-item'>CPU: Intel(R) Core(TM) i5-8259U CPU @ 2.30GHz</a>
+                    <a class='navbar-item'>CPU Frequency: 2294.59 MHz</a>
                 </div>
             </div>
             <div class='navbar-item has-dropdown is-hoverable'>
@@ -67,11 +100,11 @@ Highcharts.chart('chart_id_0', {
         series: { label: { enabled: false}, dataLabels: { enabled: false , allowOverlap: true} }
     },
     series: [
-        { name: 'libc', data: [21.998680, 25.980482, 28.985027, 31.979177, 34.983723, 37.988270, 40.992813, 43.986961, 46.981113, 49.985657] },
-        { name: 'libcpp', data: [18.921360, 22.861576, 25.086395, 28.413229, 33.694576, 34.796589, 38.144215, 43.124065, 44.537968, 43.477543] },
-        { name: 'lemire', data: [5.717993, 6.705647, 8.992844, 9.990893, 10.999340, 11.997390, 13.224159, 6.861592, 8.140343, 10.271595] },
-        { name: 'yy', data: [3.992199, 4.990249, 5.988298, 6.986348, 7.994794, 8.982448, 9.990893, 11.196871, 12.205317, 14.398947] },
-        { name: 'null', data: [3.004545, 2.994149, 2.994149, 3.004545, 2.983753, 2.952564, 2.994149, 3.004545, 3.004545, 2.994149] }
+        { name: 'libc', data: [37.999966, 45.409737, 53.000366, 60.728241, 66.553078, 73.003357, 81.004715, 88.002563, 96.441536, 103.808083] },
+        { name: 'libcpp', data: [19.670149, 26.417023, 28.491758, 32.277115, 34.787674, 41.126411, 45.225288, 49.291100, 53.442364, 57.939419] },
+        { name: 'lemire', data: [11.998249, 13.000162, 15.004186, 15.015539, 17.013987, 19.010441, 20.035061, 15.002393, 16.003708, 17.013588] },
+        { name: 'yy', data: [8.001356, 8.999285, 10.997931, 12.999963, 12.006814, 16.187757, 16.234566, 17.007412, 19.005859, 22.008410] },
+        { name: 'null', data: [5.999324, 5.999324, 5.999523, 5.999523, 5.999125, 5.999125, 5.999125, 5.999324, 5.999324, 5.999324] }
     ]
 });
 </script>
@@ -84,7 +117,7 @@ Highcharts.chart('chart_id_1', {
     chart: { type: 'bar' },
     title: { text: 'atoi u32 (random length)' },
     credits: { enabled: false },
-    xAxis: { allowDecimals: true, categories: ['libcpp', 'libc', 'lemire', 'yy', 'null'], type: 'linear' },
+    xAxis: { allowDecimals: true, categories: ['libc', 'libcpp', 'lemire', 'yy', 'null'], type: 'linear' },
     yAxis: { title: { text: 'average CPU cycles' }, allowDecimals: true, type: 'linear' },
     tooltip: {valueDecimals: 2, shared: false, crosshairs: false, shadow: false },
     legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: false },
@@ -93,7 +126,7 @@ Highcharts.chart('chart_id_1', {
         series: { label: { enabled: false}, dataLabels: { enabled: true , allowOverlap: true, format: '{point.y:.2f}' } }
     },
     series: [
-        { data: [64.904419, 54.923923, 29.234541, 17.112394, 2.962960] }
+        { data: [96.699287, 72.420738, 41.815601, 41.230587, 5.999324] }
     ]
 });
 </script>
@@ -115,11 +148,11 @@ Highcharts.chart('chart_id_2', {
         series: { label: { enabled: false}, dataLabels: { enabled: false , allowOverlap: true} }
     },
     series: [
-        { name: 'libcpp', data: [19.035719, 23.786852, 25.242342, 32.488598, 31.719269, 44.985012, 42.957726, 46.232574, 49.413857, 59.144844, 64.446983, 67.908966, 64.467773, 65.808907, 66.547043, 67.524300, 72.493759, 78.305321, 83.877762, 88.732857] },
-        { name: 'libc', data: [22.445723, 27.300819, 28.985027, 31.968781, 34.973328, 38.029854, 40.982418, 43.976566, 46.981113, 49.985657, 52.979805, 55.984352, 58.988899, 62.066219, 65.642563, 69.052567, 72.618515, 74.022018, 77.941444, 80.727669] },
-        { name: 'yy', data: [4.002595, 5.000645, 5.988298, 6.986348, 8.181929, 9.325527, 10.500315, 11.664706, 12.995440, 13.993489, 15.001935, 16.467821, 19.202061, 20.979837, 22.705631, 24.701731, 26.749811, 29.317711, 32.155914, 34.973328] },
-        { name: 'lemire', data: [5.707597, 6.705647, 8.992844, 10.001290, 10.999340, 11.997390, 13.213762, 8.015587, 9.138392, 10.313181, 12.070164, 14.097452, 16.145535, 18.359957, 20.792704, 10.209217, 11.664706, 13.640013, 15.729680, 18.547091] },
-        { name: 'null', data: [2.994149, 3.004545, 2.994149, 2.994149, 3.004545, 2.994149, 3.004545, 2.994149, 2.994149, 2.983753, 3.004545, 2.994149, 2.994149, 2.994149, 2.994149, 2.994149, 2.952564, 2.994149, 2.994149, 2.994149] }
+        { name: 'libc', data: [38.003155, 45.003792, 52.999771, 59.093510, 66.006310, 73.001564, 80.004997, 87.003838, 94.005272, 101.505280, 109.164825, 116.001732, 123.002571, 130.004013, 137.005447, 145.004410, 151.003326, 158.004974, 165.007599, 172.004654] },
+        { name: 'libcpp', data: [21.363043, 27.790619, 31.940887, 39.824326, 46.362450, 52.917107, 58.696331, 58.901890, 73.015114, 77.811340, 83.886955, 91.030212, 97.845207, 103.678215, 109.353455, 114.757812, 120.227493, 133.597946, 136.017868, 144.279770] },
+        { name: 'yy', data: [8.001356, 10.997532, 12.016575, 14.024582, 15.047210, 17.046055, 19.042908, 19.060238, 22.056015, 24.066015, 25.074900, 26.076214, 29.073385, 30.072111, 33.058529, 33.076256, 36.072632, 38.068287, 40.064144, 43.066097] },
+        { name: 'lemire', data: [11.998448, 15.002991, 17.998768, 21.002712, 23.999487, 27.002634, 30.002197, 14.069400, 16.071033, 18.073065, 19.356230, 24.036535, 25.062748, 28.058527, 30.067730, 17.073145, 19.071194, 20.098402, 21.166843, 25.093224] },
+        { name: 'null', data: [5.999125, 7.000838, 5.999125, 5.999125, 5.999125, 5.999125, 5.999125, 5.999324, 5.999125, 5.998726, 5.999125, 5.999125, 5.998527, 5.999125, 5.998926, 5.998726, 5.999324, 5.998726, 5.999324, 5.999324] }
     ]
 });
 </script>
@@ -132,7 +165,7 @@ Highcharts.chart('chart_id_3', {
     chart: { type: 'bar' },
     title: { text: 'atoi u64 (random length)' },
     credits: { enabled: false },
-    xAxis: { allowDecimals: true, categories: ['libcpp', 'libc', 'yy', 'lemire', 'null'], type: 'linear' },
+    xAxis: { allowDecimals: true, categories: ['libc', 'libcpp', 'yy', 'lemire', 'null'], type: 'linear' },
     yAxis: { title: { text: 'average CPU cycles' }, allowDecimals: true, type: 'linear' },
     tooltip: {valueDecimals: 2, shared: false, crosshairs: false, shadow: false },
     legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: false },
@@ -141,7 +174,7 @@ Highcharts.chart('chart_id_3', {
         series: { label: { enabled: false}, dataLabels: { enabled: true , allowOverlap: true, format: '{point.y:.2f}' } }
     },
     series: [
-        { data: [93.837471, 86.788742, 29.390486, 22.279381, 2.994149] }
+        { data: [163.582809, 127.127937, 52.527897, 48.356117, 5.999523] }
     ]
 });
 </script>
@@ -163,11 +196,11 @@ Highcharts.chart('chart_id_4', {
         series: { label: { enabled: false}, dataLabels: { enabled: false , allowOverlap: true} }
     },
     series: [
-        { name: 'libc', data: [24.483408, 27.487953, 30.242987, 32.998020, 36.002563, 39.121471, 42.001259, 44.995407, 48.010349, 49.497028] },
-        { name: 'libcpp', data: [21.229349, 25.751762, 29.390486, 31.823231, 36.324852, 39.901196, 41.938881, 46.357330, 48.582150, 48.020748] },
-        { name: 'lemire', data: [6.892781, 8.712142, 10.500315, 11.508761, 12.766720, 14.627666, 11.550346, 8.181929, 10.541901, 12.049372] },
-        { name: 'yy', data: [5.250157, 6.071469, 7.131897, 8.213118, 9.283942, 10.375559, 11.529553, 12.777116, 14.638062, 15.937607] },
-        { name: 'null', data: [2.994149, 2.994149, 2.994149, 2.994149, 2.994149, 3.004545, 2.994149, 2.994149, 2.994149, 2.994149] }
+        { name: 'libc', data: [39.136532, 47.018375, 54.508614, 61.507061, 68.016502, 75.028297, 82.506989, 89.508026, 96.052124, 99.550453] },
+        { name: 'libcpp', data: [29.111431, 35.327671, 39.669754, 46.572792, 52.857353, 59.935074, 66.892891, 73.513680, 80.778641, 84.259834] },
+        { name: 'lemire', data: [16.326590, 19.497852, 22.504784, 25.513510, 28.506897, 31.502476, 33.050758, 34.211823, 36.254887, 37.196445] },
+        { name: 'yy', data: [13.269065, 15.707914, 17.727674, 19.689272, 21.555857, 23.593742, 25.801334, 27.835436, 29.878700, 31.099718] },
+        { name: 'null', data: [5.998926, 5.998726, 5.998726, 5.998726, 5.998926, 5.999523, 5.998726, 5.999125, 5.998926, 5.999125] }
     ]
 });
 </script>
@@ -180,7 +213,7 @@ Highcharts.chart('chart_id_5', {
     chart: { type: 'bar' },
     title: { text: 'atoi i32 (random length)' },
     credits: { enabled: false },
-    xAxis: { allowDecimals: true, categories: ['libcpp', 'libc', 'lemire', 'yy', 'null'], type: 'linear' },
+    xAxis: { allowDecimals: true, categories: ['libc', 'libcpp', 'lemire', 'yy', 'null'], type: 'linear' },
     yAxis: { title: { text: 'average CPU cycles' }, allowDecimals: true, type: 'linear' },
     tooltip: {valueDecimals: 2, shared: false, crosshairs: false, shadow: false },
     legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: false },
@@ -189,7 +222,7 @@ Highcharts.chart('chart_id_5', {
         series: { label: { enabled: false}, dataLabels: { enabled: true , allowOverlap: true, format: '{point.y:.2f}' } }
     },
     series: [
-        { data: [76.142876, 64.561340, 32.706921, 21.229349, 2.983753] }
+        { data: [105.624474, 97.505791, 52.576298, 45.391212, 5.999125] }
     ]
 });
 </script>
@@ -211,11 +244,11 @@ Highcharts.chart('chart_id_6', {
         series: { label: { enabled: false}, dataLabels: { enabled: false , allowOverlap: true} }
     },
     series: [
-        { name: 'libcpp', data: [22.175417, 28.298868, 30.773201, 40.181896, 40.753696, 47.916782, 47.740044, 56.025936, 59.550301, 65.309883, 67.856987, 68.293633, 69.166924, 70.289734, 74.042816, 77.587967, 82.058403, 89.169502, 90.676979] },
-        { name: 'libc', data: [25.044811, 27.716673, 30.513290, 33.330704, 36.418419, 39.350189, 42.188393, 44.995407, 47.979160, 51.098068, 54.154594, 57.512615, 59.966156, 63.282589, 65.996040, 69.031776, 72.057114, 74.988884, 77.473610] },
-        { name: 'yy', data: [5.260554, 6.133847, 7.287842, 8.421044, 9.533454, 10.718638, 11.955804, 13.255348, 14.554892, 16.135138, 18.037670, 20.220903, 22.217003, 24.566578, 27.217648, 29.390486, 31.802439, 34.796589, 36.439213] },
-        { name: 'lemire', data: [6.882385, 8.712142, 10.500315, 11.508761, 12.777116, 14.638062, 12.288487, 9.606229, 11.321627, 13.234555, 15.345015, 17.528248, 19.763464, 22.352156, 17.850534, 12.797909, 14.742026, 16.946053, 18.609468] },
-        { name: 'null', data: [2.942168, 2.994149, 2.994149, 2.994149, 3.004545, 2.994149, 3.004545, 2.994149, 2.994149, 2.994149, 2.994149, 3.004545, 2.994149, 2.983753, 3.004545, 3.004545, 3.004545, 2.994149, 3.004545] }
+        { name: 'libc', data: [42.861931, 48.625217, 55.356556, 63.083828, 70.099403, 77.105820, 84.010056, 91.130806, 98.132240, 105.148613, 112.155029, 119.166824, 126.173637, 133.188812, 140.196030, 147.212997, 154.222992, 161.236588, 211.029434] },
+        { name: 'libcpp', data: [26.304880, 32.916508, 37.844402, 44.357033, 50.325283, 55.900734, 62.276123, 68.964241, 75.494194, 82.039291, 88.480415, 95.014755, 100.887993, 106.921974, 113.049774, 118.302948, 126.980743, 132.446045, 138.432617] },
+        { name: 'lemire', data: [17.313763, 18.513069, 20.315516, 22.240263, 24.223572, 26.309063, 30.298388, 34.197880, 36.128601, 38.175850, 40.252975, 42.206207, 44.268791, 46.208477, 42.489052, 38.849701, 40.779228, 42.902367, 44.002876] },
+        { name: 'yy', data: [14.823323, 17.018965, 19.052668, 20.977217, 23.046972, 24.902601, 26.785122, 29.117805, 31.284365, 33.101353, 35.087849, 37.245644, 39.266800, 41.129002, 43.169476, 45.196606, 47.002041, 48.830181, 49.855000] },
+        { name: 'null', data: [4.998607, 4.998806, 4.998806, 5.998926, 4.998806, 4.998607, 4.998806, 4.999005, 4.998806, 4.999005, 4.998806, 4.999005, 4.999005, 4.999005, 4.998607, 4.999005, 4.998806, 4.998607, 4.999005] }
     ]
 });
 </script>
@@ -228,7 +261,7 @@ Highcharts.chart('chart_id_7', {
     chart: { type: 'bar' },
     title: { text: 'atoi i64 (random length)' },
     credits: { enabled: false },
-    xAxis: { allowDecimals: true, categories: ['libcpp', 'libc', 'lemire', 'yy', 'null'], type: 'linear' },
+    xAxis: { allowDecimals: true, categories: ['libc', 'libcpp', 'lemire', 'yy', 'null'], type: 'linear' },
     yAxis: { title: { text: 'average CPU cycles' }, allowDecimals: true, type: 'linear' },
     tooltip: {valueDecimals: 2, shared: false, crosshairs: false, shadow: false },
     legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: false },
@@ -237,7 +270,7 @@ Highcharts.chart('chart_id_7', {
         series: { label: { enabled: false}, dataLabels: { enabled: true , allowOverlap: true, format: '{point.y:.2f}' } }
     },
     series: [
-        { data: [92.205238, 79.292969, 37.312504, 32.706921, 2.994149] }
+        { data: [142.022568, 130.305573, 67.420334, 58.966827, 5.999324] }
     ]
 });
 </script>

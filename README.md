@@ -71,10 +71,7 @@ char *itoa_i64(int64_t val, char *buf);
 ![img](docs/images/itoa-u64-random-length.png)
 
 Click these links to see more reports with interactive charts:
-* [Intel NUC 8i5 clang](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_clang_itoa.html)
-* [Intel NUC 8i5 gcc](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_gcc_itoa.html)
-* [Intel NUC 8i5 msvc](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_msvc_itoa.html)
-* [Apple A12 clang](https://ibireme.github.io/c_numconv_benchmark/reports/Apple_A12_itoa.html)
+* [Intel NUC 8i5 gcc 9.3](https://ibireme.github.io/c_numconv_benchmark/reports/itoa.html)
 
 Note:
 * The `yyjson_large_lut` uses a large look-up table, and may not be suitable for common cases.
@@ -97,14 +94,11 @@ uint64_t atoi_u64(const char *str, size_t len, char **endptr, atoi_result *res);
 int64_t atoi_i64(const char *str, size_t len, char **endptr, atoi_result *res);
 ```
 
-![img](docs/images/atoi-u64-fixed-length.png)
-![img](docs/images/atoi-u64-random-length.png)
+![img](docs/images/atoi-i64-fixed-length.png)
+![img](docs/images/atoi-i64-random-length.png)
 
 Click these links to see more reports with interactive charts:
-* [Intel NUC 8i5 clang](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_clang_atoi.html)
-* [Intel NUC 8i5 gcc](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_gcc_atoi.html)
-* [Intel NUC 8i5 msvc](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_msvc_atoi.html)
-* [Apple A12 clang](https://ibireme.github.io/c_numconv_benchmark/reports/Apple_A12_atoi.html)
+* [Intel NUC 8i5 gcc 9.3](https://ibireme.github.io/c_numconv_benchmark/reports/atoi.html)
 
 -------
 
@@ -114,21 +108,17 @@ Function prototype:
 // Function prototype:
 char *dtoa(double val, char *buf);
 ```
-![img](docs/images/dtoa-random-fixed-len.png)
-![img](docs/images/dtoa-nomalized-fixed-len.png)
-![img](docs/images/dtoa-integer-fixed-len.png)
+![img](docs/images/dtoa-fixed-length.png)
+![img](docs/images/dtoa-nomalized.png)
+![img](docs/images/dtoa-integer.png)
 
 Click these links to see more reports with interactive charts:
-* [Intel NUC 8i5 clang](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_clang_dtoa.html)
-* [Intel NUC 8i5 gcc](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_gcc_dtoa.html)
-* [Intel NUC 8i5 msvc](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_msvc_dtoa.html)
-* [Apple A12 clang](https://ibireme.github.io/c_numconv_benchmark/reports/Apple_A12_dtoa.html)
+* [Intel NUC 8i5 gcc 9.3](https://ibireme.github.io/c_numconv_benchmark/reports/dtoa.html)
 
 Note: the following functions may not generate shortest decimal representation, or may not remove the trailing zeros in fraction part:
 * fpconv
 * milo
 * emyg
-* schubfach
 * erthink
 
 -------
@@ -139,18 +129,18 @@ Function prototype:
 // Function prototype:
 double strtod(const char *str, size_t len, char **endptr);
 ```
-![img](docs/images/strtod-random-fixed-len.png)
-![img](docs/images/strtod-normalized-fixed-len.png)
+![img](docs/images/strtod-fixed-length.png)
+![img](docs/images/strtod-random-normalized.png)
 ![img](docs/images/strtod-integer-fixed-len.png)
 
 
 Click these links to see more reports with interactive charts:
-* [Intel NUC 8i5 clang](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_clang_strtod.html)
-* [Intel NUC 8i5 gcc](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_gcc_strtod.html)
-* [Intel NUC 8i5 msvc](https://ibireme.github.io/c_numconv_benchmark/reports/Intel_NUC_8i5_msvc_strtod.html)
-* [Apple A12 clang](https://ibireme.github.io/c_numconv_benchmark/reports/Apple_A12_strtod.html)
+* [Intel NUC 8i5 gcc 9.3](https://ibireme.github.io/c_numconv_benchmark/reports/strtod.html)
 
-Note: `yy_fast` may returns inaccurate result with 0-2 ulp error in some cases.
+Note: 
+* `abseil` may returns inaccurate result with 0-1 ulp error in some cases.
+* `yy_fast` may returns inaccurate result with 0-2 ulp error in some cases.
+* `ryu` and `lemire` may reject some integer number or large number.
 
 -------
 

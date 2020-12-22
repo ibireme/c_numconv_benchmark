@@ -121,11 +121,13 @@ static void strtod_func_verify_all(void) {
                 // read test string with google
                 int processed = 0;
                 f64 val1 = google_string_to_double(line, &processed);
+                if (val1 == -0.0) val1 = 0.0;
                 if (!processed) continue;
                 
                 // read test number with the func
                 char *end;
                 f64 val2 = func(line, strlen(line), &end);
+                if (val2 == -0.0) val2 = 0.0;
                 
                 // get ulp diff
                 u64 uval1 = f64_to_u64_raw(val1);

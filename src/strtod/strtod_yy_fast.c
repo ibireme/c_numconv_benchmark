@@ -571,15 +571,9 @@ double strtod_yy_fast(const char *str, size_t len, char **end) {
             else goto digi_sepr_i;
          }
      */
-#if yy_is_real_gcc
-#define expr_intg(i) \
-    if (likely((num = (u64)(cur[i] - (u8)'0')) <= 9)) sig = num + sig * 10; \
-    else { __asm volatile("":"=m"(cur[i])::); goto digi_sepr_##i; }
-#else
 #define expr_intg(i) \
     if (likely((num = (u64)(cur[i] - (u8)'0')) <= 9)) sig = num + sig * 10; \
     else { goto digi_sepr_##i; }
-#endif
     repeat_in_1_18(expr_intg);
 #undef expr_intg
     
@@ -598,19 +592,11 @@ double strtod_yy_fast(const char *str, size_t len, char **end) {
 #undef expr_sepr
     
     /* read fraction part */
-#if yy_is_real_gcc
-#define expr_frac(i) \
-    digi_frac_##i: \
-    if (likely((num = (u64)(cur[i + 1] - (u8)'0')) <= 9)) \
-        sig = num + sig * 10; \
-    else { __asm volatile("":"=m"(cur[i + 1])::); goto digi_stop_##i; }
-#else
 #define expr_frac(i) \
     digi_frac_##i: \
     if (likely((num = (u64)(cur[i + 1] - (u8)'0')) <= 9)) \
         sig = num + sig * 10; \
     else { goto digi_stop_##i; }
-#endif
     repeat_in_1_18(expr_frac)
 #undef expr_frac
     

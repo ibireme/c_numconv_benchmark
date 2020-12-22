@@ -357,7 +357,7 @@ static void fill_rand_i64_len(char *buf, u32 count, u32 len) {
 static void atoi_group_benchmark_all(const char *output_path) {
     
     static const int sample_count = 10000;
-    static const int repeat_count = 16;
+    static const int repeat_count = 64;
     
     yy_chart *charts[8], *chart;
     int chart_count = 8;
