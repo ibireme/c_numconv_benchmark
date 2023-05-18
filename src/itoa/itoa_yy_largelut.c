@@ -161,10 +161,11 @@ char *itoa_u32_yy_largelut(uint32_t val, char *buf) {
 }
 
 char *itoa_i32_yy_largelut(int32_t val, char *buf) {
-    uint32_t neg = (uint32_t)-val;
+    uint32_t pos = (uint32_t)val;
+    uint32_t neg = ~pos + 1;
     size_t sign = val < 0;
     *buf = '-';
-    return itoa_u32_impl(sign ? (uint32_t)neg : (uint32_t)val, buf + sign);
+    return itoa_u32_impl(sign ? neg : pos, buf + sign);
 }
 
 
@@ -252,10 +253,11 @@ char *itoa_u64_yy_largelut(uint64_t val, char *buf) {
 }
 
 char *itoa_i64_yy_largelut(int64_t val, char *buf) {
-    uint64_t neg = (uint64_t)-val;
+    uint64_t pos = (uint64_t)val;
+    uint64_t neg = ~pos + 1;
     size_t sign = val < 0;
     *buf = '-';
-    return itoa_u64_impl(sign ? (uint64_t)neg : (uint64_t)val, buf + sign);
+    return itoa_u64_impl(sign ? neg : pos, buf + sign);
 }
 
 
