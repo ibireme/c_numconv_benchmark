@@ -4,6 +4,6 @@
 #include "SwiftDtoa.h"
 
 char *dtoa_swift(double val, char *buf) {
-    size_t len = swift_format_double(val, buf, 32);
+    size_t len = swift_dtoa_optimal_double(val, buf, 32);
     return buf + len;
 }

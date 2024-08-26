@@ -242,7 +242,7 @@ static char *get_name_aligned(const char *name, bool align_right) {
 static void dtoa_func_benchmark_all(const char *output_path) {
     printf("initialize...\n");
     yy_cpu_setup_priority();
-    yy_cpu_spin(0.5);
+    yy_cpu_spin(1.0);
     yy_cpu_measure_freq();
     
     

@@ -31,6 +31,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 #if defined(__clang__)
 #   define clang_attribute __has_attribute
@@ -94,7 +95,7 @@
 /* Lookup table for 4 digits (40000 bytes): */
 /* { "0000" "0001" "0002" ... "9999" }      */
 table_align(4)
-static const char char_table[] = {
+static const char digit_table[] = {
     C1('0'), C1('1'), C1('2'), C1('3'), C1('4'),
     C1('5'), C1('6'), C1('7'), C1('8'), C1('9')
 };
@@ -105,13 +106,11 @@ static const uint8_t lz_table[] = {
     R10(3), R90(2), R900(1), R9000(0)
 };
 
+static force_inline void byte_copy_4(void *dst, const void *src) {
+    memcpy(dst, src, 4);
+}
 
 static force_inline char *itoa_u32_impl(uint32_t val, char *buf) {
-    
-    /* This struct can help compiler generate 4-byte load/store */
-    /* instructions on platforms that support unaligned access. */
-    typedef struct { char c1, c2, c3, c4; } quad;
-    
     /* The maximum value of uint32_t is 4294967295 (10 digits). */
     /* These digits are named as 'aabbccddee' here.             */
     uint32_t aa, aabb, bbcc, ccdd, ddee, bbccddee;
@@ -126,7 +125,7 @@ static force_inline char *itoa_u32_impl(uint32_t val, char *buf) {
     
     if (val < 10000) { /* 1-4 digits: aabb */
         lz = lz_table[val];
-        ((quad *)buf)[0] = *(quad *)&(char_table[val * 4 + lz]);
+        byte_copy_4(buf, digit_table + val * 4 + lz);
         buf += 4 - lz;
         return buf;
         
@@ -135,9 +134,9 @@ static force_inline char *itoa_u32_impl(uint32_t val, char *buf) {
         aabb = (uint32_t)(((uint64_t)val * 109951163) >> 40);
         ccdd = val - aabb * 10000; /* val % 10000 */
         lz = lz_table[aabb];
-        ((quad *)buf)[0] = *(quad *)&(char_table[aabb * 4 + lz]);
+        byte_copy_4(buf, digit_table + aabb * 4 + lz);
         buf += 4 - lz;
-        ((quad *)buf)[0] = ((quad *)char_table)[ccdd];
+        byte_copy_4(buf, digit_table + ccdd * 4);
         return buf + 4;
         
     } else { /* 9-10 digits: aabbccddee */
@@ -148,10 +147,10 @@ static force_inline char *itoa_u32_impl(uint32_t val, char *buf) {
         bbcc = (uint32_t)(((uint64_t)bbccddee * 109951163) >> 40);
         ddee = bbccddee - bbcc * 10000; /* (bbccddee % 10000) */
         lz = lz_table[aa];
-        ((quad *)buf)[0] = *(quad *)&(char_table[aa * 4 + lz]);
+        byte_copy_4(buf, digit_table + aa * 4 + lz);
         buf += 4 - lz;
-        ((quad *)buf)[0] = ((quad *)char_table)[bbcc];
-        ((quad *)buf)[1] = ((quad *)char_table)[ddee];
+        byte_copy_4(buf + 0, digit_table + bbcc * 4);
+        byte_copy_4(buf + 4, digit_table + ddee * 4);
         return buf + 8;
     }
 }
@@ -169,13 +168,12 @@ char *itoa_i32_yy_largelut(int32_t val, char *buf) {
 }
 
 
-static force_inline char *itoa_u64_impl_len_1_8(uint32_t val, char *buf) {
-    typedef struct { char c1, c2, c3, c4; } quad;
+static force_inline char *itoa_u64_impl_len_1_to_8(uint32_t val, char *buf) {
     uint32_t aabb, ccdd, lz;
     
     if (val < 10000) { /* 1-4 digits: aabb */
         lz = lz_table[val];
-        ((quad *)buf)[0] = *(quad *)&(char_table[val * 4 + lz]);
+        byte_copy_4(buf, digit_table + val * 4 + lz);
         buf += 4 - lz;
         return buf;
         
@@ -184,40 +182,35 @@ static force_inline char *itoa_u64_impl_len_1_8(uint32_t val, char *buf) {
         aabb = (uint32_t)(((uint64_t)val * 109951163) >> 40);
         ccdd = val - aabb * 10000; /* (val % 10000) */
         lz = lz_table[aabb];
-        ((quad *)buf)[0] = *(quad *)&(char_table[aabb * 4 + lz]);
+        byte_copy_4(buf, digit_table + aabb * 4 + lz);
         buf += 4 - lz;
-        ((quad *)buf)[0] = ((quad *)char_table)[ccdd];
+        byte_copy_4(buf, digit_table + ccdd * 4);
         return buf + 4;
     }
 }
 
-static force_inline char *itoa_u64_impl_len_5_8(uint32_t val, char *buf) {
-    /* 5-8 digits: aabbccdd */
-    typedef struct { char c1, c2, c3, c4; } quad;
+static force_inline char *itoa_u64_impl_len_5_to_8(uint32_t val, char *buf) {
     uint32_t aabb, ccdd, lz;
     aabb = (uint32_t)(((uint64_t)val * 109951163) >> 40); /* (val / 10000) */
     ccdd = val - aabb * 10000; /* (val % 10000) */
     lz = lz_table[aabb];
-    ((quad *)buf)[0] = *(quad *)&(char_table[aabb * 4 + lz]);
+    byte_copy_4(buf, digit_table + aabb * 4 + lz);
     buf += 4 - lz;
-    ((quad *)buf)[0] = ((quad *)char_table)[ccdd];
+    byte_copy_4(buf, digit_table + ccdd * 4);
     return buf + 4;
 }
 
 static force_inline char *itoa_u64_impl_len_4(uint32_t val, char *buf) {
-    typedef struct { char c1, c2, c3, c4; } quad;
-    ((quad *)buf)[0] = ((quad *)char_table)[val];
+    byte_copy_4(buf, digit_table + val * 4);
     return buf + 4;
 }
 
 static force_inline char *itoa_u64_impl_len_8(uint32_t val, char *buf) {
-    /* 8 digits: aabbccdd */
-    typedef struct { char c1, c2, c3, c4; } quad;
     uint32_t aabb, ccdd;
     aabb = (uint32_t)(((uint64_t)val * 109951163) >> 40); /* (val / 10000) */
     ccdd = val - aabb * 10000; /* (val % 10000) */
-    ((quad *)buf)[0] = ((quad *)char_table)[aabb];
-    ((quad *)buf)[1] = ((quad *)char_table)[ccdd];
+    byte_copy_4(buf + 0, digit_table + aabb * 4);
+    byte_copy_4(buf + 4, digit_table + ccdd * 4);
     return buf + 8;
 }
 
@@ -226,13 +219,13 @@ static force_inline char *itoa_u64_impl(uint64_t val, char *buf) {
     uint32_t mid, low;
     
     if (val < 100000000) { /* 1-8 digits */
-        buf = itoa_u64_impl_len_1_8((uint32_t)val, buf);
+        buf = itoa_u64_impl_len_1_to_8((uint32_t)val, buf);
         return buf;
         
     } else if (val < (uint64_t)100000000 * 100000000) { /* 9-16 digits */
         hgh = val / 100000000;
         low = (uint32_t)(val - hgh * 100000000); /* (val % 100000000) */
-        buf = itoa_u64_impl_len_1_8((uint32_t)hgh, buf);
+        buf = itoa_u64_impl_len_1_to_8((uint32_t)hgh, buf);
         buf = itoa_u64_impl_len_8(low, buf);
         return buf;
         
@@ -241,7 +234,7 @@ static force_inline char *itoa_u64_impl(uint64_t val, char *buf) {
         low = (uint32_t)(val - tmp * 100000000); /* (val % 100000000) */
         hgh = (uint32_t)(tmp / 10000);
         mid = (uint32_t)(tmp - hgh * 10000); /* (tmp % 10000) */
-        buf = itoa_u64_impl_len_5_8((uint32_t)hgh, buf);
+        buf = itoa_u64_impl_len_5_to_8((uint32_t)hgh, buf);
         buf = itoa_u64_impl_len_4(mid, buf);
         buf = itoa_u64_impl_len_8(low, buf);
         return buf;

@@ -335,7 +335,7 @@ static void fill_integer_fix_len(char *buf, int count, int len) {
 static void strtod_func_benchmark_all(const char *output_path) {
     printf("initialize...\n");
     yy_cpu_setup_priority();
-    yy_cpu_spin(0.5);
+    yy_cpu_spin(1.0);
     yy_cpu_measure_freq();
     
     int num_per_case = 5000;
@@ -534,7 +534,6 @@ static void strtod_func_register_all(void) {
     strtod_func_register(libc)
     strtod_func_register(david_gay)
     strtod_func_register(google)
-    strtod_func_register(abseil)
     strtod_func_register(lemire)
 #ifndef _MSC_VER
     strtod_func_register(ryu)

@@ -6,8 +6,6 @@
 #ifndef yy_double_h
 #define yy_double_h
 
-#include <stdio.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -24,7 +22,7 @@ double yy_string_to_double(const char *str, char **endptr);
 /**
  Write double to string (shortest decimal representation with null-terminator).
  @param val A double number.
- @param buf A string buffer, as least 32 bytes.
+ @param buf A string buffer, as least 40 bytes.
  @return The ending of this string.
  */
 char *yy_double_to_string(double val, char *buf);

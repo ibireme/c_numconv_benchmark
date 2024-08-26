@@ -1,4 +1,4 @@
-Update: 2020-09-18
-Source: https://github.com/apple/swift/blob/master/include/swift/Runtime/SwiftDtoa.h
-Source: https://github.com/apple/swift/blob/master/stdlib/public/runtime/SwiftDtoa.cpp
+Update: 2024-04-08
+Source: https://github.com/swiftlang/swift/blob/main/include/swift/Runtime/SwiftDtoa.h
+Source: https://github.com/swiftlang/swift/blob/main/stdlib/public/runtime/SwiftDtoa.cpp
 Modify: include header path

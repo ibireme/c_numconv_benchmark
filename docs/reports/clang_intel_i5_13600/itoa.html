@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'>
+<title>Report</title>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/highcharts/8.2.0/highcharts.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/highcharts/8.2.0/modules/series-label.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/highcharts/8.2.0/modules/exporting.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/highcharts/8.2.0/modules/export-data.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/highcharts/8.2.0/modules/offline-exporting.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/sortable/0.8.0/js/sortable.min.js'></script>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.0/css/bulma.min.css' />
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/sortable/0.8.0/css/sortable-theme-bootstrap.min.css' />
+<script>window.onload=Sortable.init</script>
+<style type='text/css'>
+hr {
+    height: 1px;
+    margin: 5px 0; 
+    background-color: #999999; 
+}
+.table thead {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+.highcharts-data-table table, th, td { 
+    border: 1px solid gray;
+    padding: 2pt;
+}
+.highcharts-data-table table {
+    margin: auto;
+}
+table .number { 
+    align-items: initial;
+    border-radius: initial;
+    display: table-cell;
+    font-size: initial;
+    height: initial;
+    justify-content: initial;
+    margin-right: initial;
+    min-width: initial;
+    padding: 2pt;
+    vertical-align: initial;
+    text-align: initial;
+    background-color: initial;
+}
+.table.is-narrow td, .table.is-narrow th {
+    padding: .1em .5em;
+}
+</style>
+</head>
+
+<body>
+<nav class='navbar is-light is-fixed-top' role='navigation' aria-label='main navigation'>
+    <div class='navbar-brand'>
+        <a class='navbar-item' href='#'>Report</a>
+        <a role='button' class='navbar-burger burger' aria-label='menu' data-target='main-menu'
+            onclick='document.querySelector(".navbar-menu").classList.toggle("is-active");'>
+            <span aria-hidden='true'></span>
+            <span aria-hidden='true'></span>
+            <span aria-hidden='true'></span>
+        </a>
+    </div>
+    <div id='main-menu' class='navbar-menu'>
+        <div class='navbar-start'>
+            <div class='navbar-item has-dropdown is-hoverable'>
+                <a class='navbar-link'>Info</a>
+                <div class='navbar-dropdown'>
+                    <a class='navbar-item'>Compiler: Clang 18.1.3</a>
+                    <a class='navbar-item'>OS: Linux 64-bit</a>
+                    <a class='navbar-item'>CPU: 13th Gen Intel(R) Core(TM) i5-13600KF</a>
+                    <a class='navbar-item'>CPU Frequency: 5089.33 MHz</a>
+                </div>
+            </div>
+            <div class='navbar-item has-dropdown is-hoverable'>
+                <a class='navbar-link'>Charts</a>
+                <div class='navbar-dropdown'>
+                    <a class='navbar-item' href='#chart_0'>itoa u32 (fixed length)</a>
+                    <a class='navbar-item' href='#chart_1'>itoa u32 (random length)</a>
+                    <a class='navbar-item' href='#chart_2'>itoa u64 (fixed length)</a>
+                    <a class='navbar-item' href='#chart_3'>itoa u64 (random length)</a>
+                    <a class='navbar-item' href='#chart_4'>itoa i32 (fixed length)</a>
+                    <a class='navbar-item' href='#chart_5'>itoa i32 (random length)</a>
+                    <a class='navbar-item' href='#chart_6'>itoa i64 (fixed length)</a>
+                    <a class='navbar-item' href='#chart_7'>itoa i64 (random length)</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a name='chart_0'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_0' style='width: 800px; height: 540px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_0', {
+    chart: { type: 'line' },
+    title: { text: 'itoa u32 (fixed length)' },
+    credits: { enabled: false },
+    xAxis: { title: { text: 'digit count' }, tickInterval: 1.000000, allowDecimals: true, type: 'linear' },
+    yAxis: { title: { text: 'CPU cycles' }, allowDecimals: true, type: 'logarithmic' },
+    tooltip: {valueDecimals: 2, shared: true, crosshairs: true, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: true },
+    plotOptions: {
+        line: { pointStart: 1.000000, pointInterval: 1.000000 },
+        series: { label: { enabled: false}, dataLabels: { enabled: false , allowOverlap: true} }
+    },
+    series: [
+        { name: 'naive', data: [7.991890, 11.998978, 16.997786, 20.493938, 22.990356, 26.998173, 31.002346, 31.000015, 34.996906, 38.004116] },
+        { name: 'count', data: [6.353051, 8.580748, 11.084158, 13.053183, 16.049467, 17.842258, 20.529039, 23.308453, 25.470463, 28.055874] },
+        { name: 'lut', data: [7.991307, 9.992229, 10.994729, 13.494935, 19.992033, 19.995382, 22.009121, 16.007229, 18.502628, 21.005457] },
+        { name: 'unnamed', data: [10.991380, 11.994025, 9.992958, 10.994146, 12.529721, 14.626334, 17.006380, 19.318844, 21.302143, 22.471556] },
+        { name: 'fmtlib', data: [11.030704, 11.078332, 12.090445, 12.015872, 13.274132, 13.233787, 14.325569, 14.315374, 15.320496, 15.236894] },
+        { name: 'protobuf', data: [5.991114, 6.990409, 7.989851, 7.993201, 12.976280, 11.992860, 14.996718, 12.994923, 13.997131, 13.287531] },
+        { name: 'an', data: [4.535792, 4.536666, 7.807499, 7.768610, 12.185990, 12.141276, 12.150888, 12.133265, 13.194753, 13.175964] },
+        { name: 'countlut', data: [6.990555, 6.041800, 7.075031, 7.508628, 9.101442, 9.529066, 11.079206, 11.547175, 13.176547, 13.571547] },
+        { name: 'branchlut', data: [5.993444, 6.991720, 5.992862, 6.495059, 9.438910, 10.043060, 10.703723, 11.505665, 11.063039, 11.124794] },
+        { name: 'amartin_ljust', data: [5.990822, 5.992279, 7.991307, 8.990312, 7.093237, 7.992181, 9.208348, 10.183466, 12.531614, 13.229855] },
+        { name: 'sse2', data: [5.992279, 6.991283, 5.830172, 6.495059, 9.428278, 9.999804, 10.693673, 11.514112, 8.642503, 9.001818] },
+        { name: 'branchlut2', data: [3.994561, 5.992862, 5.993735, 6.992303, 6.992886, 7.992181, 9.737199, 10.425680, 11.294183, 12.093940] },
+        { name: 'amartin', data: [3.994998, 4.993420, 6.992012, 6.991283, 7.996405, 8.993953, 8.998905, 9.609465, 10.192350, 10.985845] },
+        { name: 'amartin_ljust2', data: [3.993833, 4.021215, 7.001042, 6.991575, 8.035148, 7.998299, 10.007086, 11.006381, 10.112244, 10.090397] },
+        { name: 'unrolledlut', data: [5.991988, 5.991988, 7.554216, 5.992570, 7.996842, 7.992909, 7.995386, 8.267895, 10.652455, 10.460053] },
+        { name: 'tmueller', data: [3.996164, 6.444081, 6.459520, 5.993153, 6.013544, 6.502341, 6.526373, 9.688989, 9.690300, 9.687532] },
+        { name: 'jeaiii', data: [4.992255, 4.992401, 7.006868, 5.993444, 7.008470, 6.995507, 7.998590, 7.998881, 8.993079, 8.991040] },
+        { name: 'yy', data: [3.993542, 3.994124, 6.013398, 5.991988, 7.035269, 6.998712, 7.857311, 7.839250, 10.384315, 10.256581] },
+        { name: 'jiaendu', data: [7.995531, 7.991890, 6.990992, 4.992983, 8.067045, 7.001770, 7.001042, 4.995168, 6.992012, 6.350138] },
+        { name: 'yy_largelut', data: [3.999805, 4.003300, 4.014515, 4.000387, 6.075153, 5.998105, 6.004368, 6.004951, 6.416845, 6.405921] },
+        { name: 'null', data: [3.996309, 3.992377, 3.993542, 3.992668, 3.992814, 3.992959, 3.993105, 3.992377, 3.993396, 3.993687] }
+    ]
+});
+</script>
+
+<a name='chart_1'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_1' style='width: 640px; height: 420px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_1', {
+    chart: { type: 'bar' },
+    title: { text: 'itoa u32 (random length)' },
+    credits: { enabled: false },
+    xAxis: { allowDecimals: true, categories: ['naive', 'lut', 'count', 'branchlut2', 'countlut', 'amartin', 'fmtlib', 'sse2', 'amartin_ljust', 'unnamed', 'branchlut', 'protobuf', 'tmueller', 'unrolledlut', 'amartin_ljust2', 'jiaendu', 'jeaiii', 'an', 'yy', 'yy_largelut', 'null'], type: 'linear' },
+    yAxis: { title: { text: 'average CPU cycles' }, allowDecimals: true, type: 'linear' },
+    tooltip: {valueDecimals: 2, shared: false, crosshairs: false, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: false },
+    plotOptions: {
+        bar: { groupPadding: 0.000000, pointPadding: 0.100000, borderWidth: 0.000000, colorByPoint: true },
+        series: { label: { enabled: false}, dataLabels: { enabled: true , allowOverlap: true, format: '{point.y:.2f}' } }
+    },
+    series: [
+        { data: [50.824699, 45.785397, 42.407513, 38.248222, 37.917019, 37.402294, 37.178432, 36.459511, 34.655216, 32.001060, 31.995815, 29.977125, 28.758045, 27.665680, 24.174480, 23.562756, 22.626963, 21.755547, 21.445024, 11.680881, 4.013059] }
+    ]
+});
+</script>
+
+<a name='chart_2'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_2' style='width: 800px; height: 540px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_2', {
+    chart: { type: 'line' },
+    title: { text: 'itoa u64 (fixed length)' },
+    credits: { enabled: false },
+    xAxis: { title: { text: 'digit count' }, tickInterval: 1.000000, allowDecimals: true, type: 'linear' },
+    yAxis: { title: { text: 'CPU cycles' }, allowDecimals: true, type: 'logarithmic' },
+    tooltip: {valueDecimals: 2, shared: true, crosshairs: true, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: true },
+    plotOptions: {
+        line: { pointStart: 1.000000, pointInterval: 1.000000 },
+        series: { label: { enabled: false}, dataLabels: { enabled: false , allowOverlap: true} }
+    },
+    series: [
+        { name: 'naive', data: [7.995677, 12.000142, 16.999971, 21.492214, 23.194555, 27.000502, 31.002638, 31.507748, 35.500271, 39.259026, 43.027542, 47.042782, 51.101723, 54.689049, 59.454967, 59.780056, 64.801292, 71.780052, 76.854309, 84.170967] },
+        { name: 'count', data: [6.538753, 9.033278, 11.464446, 14.112048, 16.499521, 20.055681, 22.734306, 25.802250, 29.673157, 32.223755, 35.204750, 39.163918, 42.393822, 45.808849, 50.097328, 53.674606, 57.768646, 62.883099, 67.379272, 72.486305] },
+        { name: 'unnamed', data: [8.493213, 10.618228, 11.994316, 10.995312, 12.841264, 14.925205, 16.923069, 19.473961, 21.498623, 27.553677, 32.912384, 34.838589, 37.461864, 39.843369, 41.904007, 44.659534, 47.050358, 49.356995, 51.468029, 51.435841] },
+        { name: 'lut', data: [8.991623, 8.996284, 10.996769, 13.500032, 21.499496, 19.501051, 21.495710, 20.000044, 20.018103, 21.998634, 24.997978, 26.002954, 29.006668, 32.001205, 35.004189, 33.004433, 33.109737, 35.124352, 37.612320, 39.798508] },
+        { name: 'tmueller', data: [3.993687, 17.021381, 17.118675, 17.128433, 17.221794, 17.228203, 17.547173, 17.527802, 17.688599, 17.701853, 17.866436, 17.692677, 20.398539, 20.149916, 23.012787, 25.021864, 28.011450, 25.811718, 28.841064, 28.704010] },
+        { name: 'branchlut', data: [8.997740, 8.995410, 8.000629, 9.017985, 10.993419, 10.994875, 12.000871, 12.099766, 20.428541, 21.321951, 22.170647, 22.949139, 23.864248, 24.771494, 25.695345, 26.666531, 20.909910, 21.775209, 24.409557, 23.698210] },
+        { name: 'fmtlib', data: [4.993275, 6.037139, 7.003955, 7.047941, 9.519308, 9.554409, 12.183660, 12.076463, 14.913845, 14.658669, 17.996353, 17.710300, 21.528044, 21.129257, 24.575743, 24.288378, 27.958872, 27.504448, 32.431744, 31.484007] },
+        { name: 'countlut', data: [8.991477, 8.034419, 9.001818, 9.049299, 12.502484, 12.540645, 18.006403, 16.014658, 14.155598, 14.487240, 16.328384, 16.502144, 18.530884, 18.493015, 20.475731, 20.683718, 24.352900, 24.403877, 26.127047, 26.161858] },
+        { name: 'an', data: [4.515547, 4.523703, 7.814636, 7.836046, 11.640390, 11.660344, 11.628738, 11.616940, 14.704256, 14.696100, 20.975307, 20.908163, 21.051481, 20.971811, 20.989580, 20.882820, 26.461748, 26.554962, 26.248663, 26.445581] },
+        { name: 'protobuf', data: [6.991283, 7.990434, 9.990335, 8.991040, 11.998686, 12.996234, 15.166983, 13.996258, 14.003249, 12.809075, 13.229272, 15.579313, 16.052382, 18.521709, 19.348120, 21.274761, 22.181860, 24.514715, 25.033371, 25.347536] },
+        { name: 'amartin_ljust', data: [6.991283, 7.996842, 9.991210, 9.990918, 10.992982, 10.993127, 11.994025, 12.006114, 12.213080, 12.734358, 15.002399, 15.600578, 16.147635, 18.463158, 19.218637, 21.109013, 22.020920, 24.113745, 25.023321, 27.497456] },
+        { name: 'sse2', data: [7.991599, 7.995386, 6.990701, 6.662700, 9.992958, 10.009125, 10.716104, 11.529552, 20.394751, 20.542585, 20.471800, 20.476606, 20.530205, 20.498598, 20.539671, 18.941469, 17.178974, 17.452793, 19.008030, 18.888453] },
+        { name: 'branchlut2', data: [3.995727, 4.995314, 6.993031, 6.993177, 6.991283, 8.991914, 9.668161, 10.483066, 12.993320, 13.001040, 14.410774, 15.279278, 16.864664, 17.486292, 20.155888, 21.125471, 20.801403, 21.843519, 23.534063, 24.437668] },
+        { name: 'amartin', data: [3.996746, 4.994148, 5.993444, 5.994318, 6.993905, 6.993468, 10.992690, 9.489887, 11.528969, 11.802789, 13.784193, 14.386305, 16.112242, 16.855633, 19.256943, 20.085394, 19.176836, 19.975574, 22.598415, 23.332922] },
+        { name: 'unrolledlut', data: [5.992716, 5.993735, 7.996260, 6.992740, 9.992084, 8.992351, 7.778952, 7.590774, 10.792132, 11.606017, 13.009634, 12.970745, 15.011575, 14.900445, 18.477869, 18.104425, 18.654831, 20.118456, 21.952463, 22.508551] },
+        { name: 'amartin_ljust2', data: [4.995168, 4.994440, 6.001455, 6.013398, 8.000774, 7.364290, 9.011577, 8.511127, 9.898723, 10.781500, 13.205968, 13.204658, 15.637719, 15.681850, 18.095249, 18.034077, 20.108988, 20.581472, 22.599144, 22.418978] },
+        { name: 'yy', data: [3.994124, 3.993396, 5.001868, 5.011772, 6.010631, 6.032624, 7.755065, 7.757396, 10.863063, 10.890299, 13.169702, 13.149311, 15.684763, 15.648643, 17.656410, 17.669809, 20.938749, 20.918213, 23.028372, 22.631769] },
+        { name: 'jeaiii', data: [4.992983, 4.992983, 6.998566, 6.995799, 6.998420, 6.999731, 8.006018, 8.993662, 9.027161, 9.646605, 12.258815, 12.265514, 13.055804, 13.034102, 14.999486, 14.013153, 16.024708, 17.276266, 19.648447, 19.439878] },
+        { name: 'yy_largelut', data: [3.998640, 4.003592, 3.999513, 4.004466, 5.023570, 5.040610, 5.009005, 5.007257, 9.004440, 9.058912, 9.005605, 11.002594, 9.896976, 9.772737, 10.026748, 9.740257, 11.242623, 11.286318, 11.248886, 11.165867] },
+        { name: 'null', data: [3.992377, 3.992377, 3.991940, 3.991211, 3.991940, 3.992814, 3.992522, 3.991794, 3.991794, 3.991648, 3.991211, 3.992085, 3.991066, 3.991503, 3.992377, 3.991211, 3.991503, 3.991503, 3.991211, 3.991503] }
+    ]
+});
+</script>
+
+<a name='chart_3'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_3' style='width: 640px; height: 420px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_3', {
+    chart: { type: 'bar' },
+    title: { text: 'itoa u64 (random length)' },
+    credits: { enabled: false },
+    xAxis: { allowDecimals: true, categories: ['naive', 'count', 'sse2', 'lut', 'unnamed', 'tmueller', 'fmtlib', 'countlut', 'amartin', 'amartin_ljust', 'protobuf', 'branchlut2', 'branchlut', 'unrolledlut', 'amartin_ljust2', 'yy', 'jeaiii', 'an', 'yy_largelut', 'null'], type: 'linear' },
+    yAxis: { title: { text: 'average CPU cycles' }, allowDecimals: true, type: 'linear' },
+    tooltip: {valueDecimals: 2, shared: false, crosshairs: false, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: false },
+    plotOptions: {
+        bar: { groupPadding: 0.000000, pointPadding: 0.100000, borderWidth: 0.000000, colorByPoint: true },
+        series: { label: { enabled: false}, dataLabels: { enabled: true , allowOverlap: true, format: '{point.y:.2f}' } }
+    },
+    series: [
+        { data: [84.672295, 73.298874, 66.459213, 63.391998, 58.762844, 54.094948, 53.933277, 53.782532, 51.939930, 50.996273, 50.541412, 49.295532, 48.385666, 43.514591, 41.608192, 34.097672, 32.489857, 24.970304, 24.196182, 3.994561] }
+    ]
+});
+</script>
+
+<a name='chart_4'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_4' style='width: 800px; height: 540px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_4', {
+    chart: { type: 'line' },
+    title: { text: 'itoa i32 (fixed length)' },
+    credits: { enabled: false },
+    xAxis: { title: { text: 'digit count' }, tickInterval: 1.000000, allowDecimals: true, type: 'linear' },
+    yAxis: { title: { text: 'CPU cycles' }, allowDecimals: true, type: 'logarithmic' },
+    tooltip: {valueDecimals: 2, shared: true, crosshairs: true, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: true },
+    plotOptions: {
+        line: { pointStart: 1.000000, pointInterval: 1.000000 },
+        series: { label: { enabled: false}, dataLabels: { enabled: false , allowOverlap: true} }
+    },
+    series: [
+        { name: 'naive', data: [10.363779, 14.983319, 18.748484, 23.742050, 25.000017, 30.010042, 32.009361, 33.014336, 36.406788, 39.505318] },
+        { name: 'count', data: [7.562518, 9.809877, 12.253280, 14.543897, 17.733313, 19.253302, 21.991352, 24.709595, 27.284662, 28.541903] },
+        { name: 'lut', data: [9.494839, 11.008129, 13.765987, 16.757320, 18.016600, 18.769457, 19.006283, 18.031746, 19.766714, 20.256386] },
+        { name: 'unnamed', data: [10.719162, 11.084449, 11.500422, 12.583756, 14.236287, 16.239977, 18.599194, 20.700760, 22.277699, 13.301514] },
+        { name: 'an', data: [5.722101, 7.336034, 8.962347, 11.234030, 13.517656, 13.487361, 13.503237, 14.063693, 14.633616, 14.649492] },
+        { name: 'fmtlib', data: [5.939991, 6.259690, 7.598784, 8.932053, 11.534066, 12.082870, 12.517632, 14.265417, 16.016989, 17.015556] },
+        { name: 'protobuf', data: [6.442625, 7.495228, 8.011407, 10.501563, 12.870248, 13.004536, 13.008614, 12.624975, 12.729988, 13.266704] },
+        { name: 'countlut', data: [7.062214, 7.025511, 7.514163, 8.519138, 10.059811, 11.518045, 11.554312, 12.384946, 13.570818, 13.796282] },
+        { name: 'amartin_ljust', data: [6.006698, 7.017792, 7.424006, 9.017403, 10.004901, 10.506078, 10.091707, 11.123919, 12.795821, 13.129211] },
+        { name: 'branchlut', data: [7.002789, 6.273818, 7.001916, 9.039249, 11.000847, 11.018325, 11.373125, 11.241458, 11.040026, 11.050367] },
+        { name: 'unrolledlut', data: [8.009368, 8.995993, 9.496587, 10.004901, 11.014392, 10.003881, 7.763367, 9.179218, 10.759361, 10.766061] },
+        { name: 'branchlut2', data: [5.962276, 7.496102, 7.540670, 8.506176, 9.014635, 10.526906, 11.005507, 10.697752, 11.543679, 11.977276] },
+        { name: 'sse2', data: [7.388905, 7.350599, 6.700860, 9.006770, 10.507243, 11.054445, 11.300446, 10.315424, 9.143535, 9.025414] },
+        { name: 'jeaiii', data: [5.995483, 6.498991, 8.019564, 8.499913, 11.016723, 9.018422, 9.019296, 9.546836, 10.020922, 10.018300] },
+        { name: 'amartin', data: [4.439518, 5.499841, 6.042965, 7.500034, 9.008081, 9.167275, 10.382422, 11.089984, 11.755161, 11.771620] },
+        { name: 'tmueller', data: [5.910716, 8.414271, 7.198978, 6.008155, 6.885834, 7.677580, 9.264568, 10.830584, 10.830584, 10.819368] },
+        { name: 'amartin_ljust2', data: [4.993566, 5.499258, 6.002038, 7.013131, 8.040245, 8.648038, 9.281464, 10.004464, 10.738388, 10.728775] },
+        { name: 'yy', data: [4.165553, 5.570044, 6.996381, 7.500326, 8.024952, 8.518265, 9.013762, 9.707340, 10.372955, 10.373683] },
+        { name: 'jiaendu', data: [9.573489, 9.003858, 7.514745, 7.507754, 8.033109, 8.005144, 7.000751, 7.034250, 7.003809, 6.707705] },
+        { name: 'yy_largelut', data: [4.997644, 4.998809, 4.999392, 5.515134, 6.050393, 6.006698, 6.008737, 6.533072, 7.028715, 7.078818] },
+        { name: 'null', data: [4.009418, 4.012622, 3.992959, 3.993396, 3.993251, 3.992814, 3.993251, 3.993542, 3.992377, 3.993833] }
+    ]
+});
+</script>
+
+<a name='chart_5'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_5' style='width: 640px; height: 420px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_5', {
+    chart: { type: 'bar' },
+    title: { text: 'itoa i32 (random length)' },
+    credits: { enabled: false },
+    xAxis: { allowDecimals: true, categories: ['naive', 'count', 'lut', 'fmtlib', 'unnamed', 'branchlut2', 'countlut', 'protobuf', 'branchlut', 'amartin_ljust', 'sse2', 'amartin', 'unrolledlut', 'jeaiii', 'jiaendu', 'tmueller', 'an', 'yy', 'amartin_ljust2', 'yy_largelut', 'null'], type: 'linear' },
+    yAxis: { title: { text: 'average CPU cycles' }, allowDecimals: true, type: 'linear' },
+    tooltip: {valueDecimals: 2, shared: false, crosshairs: false, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: false },
+    plotOptions: {
+        bar: { groupPadding: 0.000000, pointPadding: 0.100000, borderWidth: 0.000000, colorByPoint: true },
+        series: { label: { enabled: false}, dataLabels: { enabled: true , allowOverlap: true, format: '{point.y:.2f}' } }
+    },
+    series: [
+        { data: [61.923565, 54.002754, 53.554302, 48.759254, 45.232517, 45.150951, 43.620914, 42.548939, 42.235210, 41.321411, 41.123474, 39.907017, 39.119495, 36.400524, 36.360325, 27.968046, 22.696293, 21.776375, 21.272722, 20.806499, 3.993833] }
+    ]
+});
+</script>
+
+<a name='chart_6'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_6' style='width: 800px; height: 540px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_6', {
+    chart: { type: 'line' },
+    title: { text: 'itoa i64 (fixed length)' },
+    credits: { enabled: false },
+    xAxis: { title: { text: 'digit count' }, tickInterval: 1.000000, allowDecimals: true, type: 'linear' },
+    yAxis: { title: { text: 'CPU cycles' }, allowDecimals: true, type: 'logarithmic' },
+    tooltip: {valueDecimals: 2, shared: true, crosshairs: true, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: true },
+    plotOptions: {
+        line: { pointStart: 1.000000, pointInterval: 1.000000 },
+        series: { label: { enabled: false}, dataLabels: { enabled: false , allowOverlap: true} }
+    },
+    series: [
+        { name: 'naive', data: [12.090590, 18.745571, 22.996037, 27.014631, 28.507093, 33.015503, 34.522240, 34.014069, 38.183846, 42.190788, 46.236473, 51.003262, 55.499874, 60.005371, 61.499584, 64.064018, 68.882370, 74.536888, 76.315552] },
+        { name: 'count', data: [8.317123, 10.529236, 13.063960, 15.875709, 18.625994, 21.716660, 24.559139, 27.720007, 30.992880, 34.084274, 37.492016, 41.000984, 44.515488, 48.302353, 52.193504, 56.068634, 60.581413, 65.510162, 67.933472] },
+        { name: 'unnamed', data: [11.976839, 12.529867, 12.528119, 13.116103, 14.779994, 16.677359, 18.987638, 21.073036, 22.709108, 30.876505, 34.558067, 36.694881, 39.143818, 41.422928, 43.726799, 46.150539, 48.675507, 50.596466, 27.531391] },
+        { name: 'lut', data: [11.934309, 15.097799, 18.792179, 23.787493, 28.008682, 30.502335, 25.250534, 19.254614, 26.003246, 27.460897, 27.999798, 30.140543, 31.762051, 35.517017, 35.120564, 32.298038, 34.342945, 36.522579, 37.855556] },
+        { name: 'branchlut', data: [9.499354, 9.033278, 8.530644, 9.545525, 11.700980, 11.554894, 12.139819, 16.676485, 21.212715, 21.884737, 22.716537, 23.580379, 24.470001, 25.442644, 26.355425, 23.931829, 21.490320, 22.781933, 23.689470] },
+        { name: 'an', data: [5.721809, 7.330062, 8.969921, 11.084303, 13.140572, 13.183102, 13.144795, 14.427960, 15.742294, 19.175089, 22.555740, 22.609339, 22.703575, 22.588657, 22.558945, 25.191982, 28.014654, 27.971979, 27.903669] },
+        { name: 'tmueller', data: [4.890738, 7.996551, 9.016237, 10.075104, 11.035365, 12.224878, 13.244565, 14.775915, 16.270126, 17.554455, 18.766544, 20.159092, 21.569698, 23.117071, 24.781836, 26.353386, 28.118210, 29.616791, 31.261600] },
+        { name: 'fmtlib', data: [6.496515, 7.991890, 8.012718, 9.316128, 10.278429, 11.689765, 12.941616, 14.246045, 15.693939, 17.328264, 18.679300, 20.314936, 21.931637, 23.447693, 25.062210, 26.623127, 28.365086, 30.005089, 31.815649] },
+        { name: 'countlut', data: [10.126663, 9.501101, 11.012061, 12.281827, 14.479958, 15.288890, 16.490055, 15.327050, 14.684302, 15.477068, 16.559092, 17.558535, 18.782129, 19.575914, 20.716635, 22.513649, 24.412470, 25.265390, 25.999750] },
+        { name: 'protobuf', data: [7.438862, 8.503554, 9.006042, 11.014975, 12.014416, 14.013882, 14.011551, 14.041700, 13.589170, 13.872020, 17.043228, 17.021381, 19.073135, 20.023638, 21.508089, 22.995747, 23.476240, 24.908987, 25.421234] },
+        { name: 'sse2', data: [8.004561, 8.006600, 8.002813, 9.498772, 11.003759, 10.720473, 11.436481, 16.403540, 20.691729, 20.797615, 20.679495, 20.739647, 20.766447, 20.896948, 20.055098, 18.284739, 17.775988, 18.448448, 19.345644] },
+        { name: 'amartin_ljust', data: [7.525960, 9.007353, 9.001236, 9.506200, 10.540160, 11.508286, 11.509889, 12.106757, 12.617256, 13.656022, 14.858935, 16.184629, 17.598734, 19.002495, 20.369699, 21.703842, 23.063181, 24.583172, 24.910007] },
+        { name: 'branchlut2', data: [5.952371, 7.997571, 8.996429, 8.503845, 8.517536, 9.501393, 10.245658, 10.787034, 11.606454, 13.307922, 14.952587, 15.948096, 17.147223, 18.908697, 20.694933, 21.088329, 21.311901, 22.591280, 23.450897] },
+        { name: 'amartin', data: [4.997061, 6.483843, 7.503675, 7.515619, 8.010678, 11.008566, 10.025583, 11.457310, 12.844031, 14.024514, 15.351082, 16.312218, 17.412886, 18.847816, 20.381060, 20.829512, 21.049442, 22.162489, 23.126247] },
+        { name: 'amartin_ljust2', data: [5.497219, 6.248766, 7.002935, 8.027429, 8.999488, 9.547419, 10.033011, 10.570309, 11.096538, 13.532367, 14.686924, 15.722632, 16.716248, 17.583586, 18.480782, 19.365307, 20.271532, 22.220894, 23.624512] },
+        { name: 'unrolledlut', data: [7.128630, 8.485348, 8.497000, 9.000216, 8.524673, 8.998905, 8.511419, 8.907001, 10.671972, 12.323337, 13.424005, 14.077239, 15.072747, 17.771618, 18.460537, 18.470587, 18.742659, 20.610020, 21.476484] },
+        { name: 'yy', data: [4.993275, 5.497510, 6.002038, 7.020559, 8.002813, 7.805459, 9.004731, 9.936154, 11.334236, 12.417572, 13.490274, 14.540256, 15.569992, 16.823881, 18.011065, 19.124695, 20.589920, 21.672235, 22.472721] },
+        { name: 'jeaiii', data: [6.003494, 6.498991, 8.002377, 9.446338, 11.002886, 9.509987, 10.005920, 10.012329, 10.012474, 12.054324, 14.019270, 14.052333, 14.059032, 15.528773, 15.510859, 16.510155, 18.024611, 19.825411, 21.016670] },
+        { name: 'yy_largelut', data: [4.997353, 4.998227, 4.999246, 5.363368, 5.751085, 5.763174, 6.009611, 7.199561, 8.387763, 8.447625, 8.381646, 9.364192, 10.364071, 10.272749, 10.268525, 10.841507, 11.606454, 11.587374, 11.570770] },
+        { name: 'null', data: [3.991211, 3.992085, 3.992959, 3.992085, 3.991503, 3.991503, 3.991648, 3.992085, 3.991794, 3.992085, 3.991940, 3.992085, 3.992085, 3.992085, 3.991503, 3.992085, 3.992377, 3.992522, 3.992668] }
+    ]
+});
+</script>
+
+<a name='chart_7'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_7' style='width: 640px; height: 420px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_7', {
+    chart: { type: 'bar' },
+    title: { text: 'itoa i64 (random length)' },
+    credits: { enabled: false },
+    xAxis: { allowDecimals: true, categories: ['naive', 'lut', 'count', 'sse2', 'unnamed', 'protobuf', 'countlut', 'amartin_ljust', 'fmtlib', 'branchlut2', 'branchlut', 'amartin', 'unrolledlut', 'tmueller', 'jeaiii', 'amartin_ljust2', 'yy', 'an', 'yy_largelut', 'null'], type: 'linear' },
+    yAxis: { title: { text: 'average CPU cycles' }, allowDecimals: true, type: 'linear' },
+    tooltip: {valueDecimals: 2, shared: false, crosshairs: false, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: false },
+    plotOptions: {
+        bar: { groupPadding: 0.000000, pointPadding: 0.100000, borderWidth: 0.000000, colorByPoint: true },
+        series: { label: { enabled: false}, dataLabels: { enabled: true , allowOverlap: true, format: '{point.y:.2f}' } }
+    },
+    series: [
+        { data: [91.153221, 80.827164, 80.532082, 74.309967, 66.777748, 65.956726, 63.805786, 60.160053, 60.159180, 59.214790, 57.662468, 54.583893, 54.026348, 52.761097, 50.685749, 38.821934, 35.230381, 29.578194, 25.796280, 3.992377] }
+    ]
+});
+</script>
+
+</body>
+</html>

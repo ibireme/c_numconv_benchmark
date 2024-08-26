@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include <limits.h>
@@ -13,7 +14,7 @@
  * Compiler Macros
  *============================================================================*/
 
-/* compiler builtin check (clang) */
+/* compiler builtin check (since gcc 10.0, clang 2.6, icc 2021) */
 #ifndef yy_has_builtin
 #   ifdef __has_builtin
 #       define yy_has_builtin(x) __has_builtin(x)
@@ -22,7 +23,7 @@
 #   endif
 #endif
 
-/* compiler attribute check (gcc/clang) */
+/* compiler attribute check (since gcc 5.0, clang 2.9, icc 17) */
 #ifndef yy_has_attribute
 #   ifdef __has_attribute
 #       define yy_has_attribute(x) __has_attribute(x)
@@ -31,7 +32,7 @@
 #   endif
 #endif
 
-/* include check (gcc/clang) */
+/* include check (since gcc 5.0, clang 2.7, icc 16, msvc 2017 15.3) */
 #ifndef yy_has_include
 #   ifdef __has_include
 #       define yy_has_include(x) __has_include(x)
@@ -40,7 +41,7 @@
 #   endif
 #endif
 
-/* inline */
+/* inline for compiler */
 #ifndef yy_inline
 #   if _MSC_VER >= 1200
 #       define yy_inline __forceinline
@@ -57,7 +58,7 @@
 #   endif
 #endif
 
-/* noinline */
+/* noinline for compiler */
 #ifndef yy_noinline
 #   if _MSC_VER >= 1200
 #       define yy_noinline __declspec(noinline)
@@ -68,7 +69,7 @@
 #   endif
 #endif
 
-/* align */
+/* align for compiler */
 #ifndef yy_align
 #   if defined(_MSC_VER)
 #       define yy_align(x) __declspec(align(x))
@@ -81,7 +82,7 @@
 #   endif
 #endif
 
-/* likely */
+/* likely for compiler */
 #ifndef yy_likely
 #   if yy_has_builtin(__builtin_expect) || __GNUC__ >= 4
 #       define yy_likely(expr) __builtin_expect(!!(expr), 1)
@@ -90,7 +91,7 @@
 #   endif
 #endif
 
-/* unlikely */
+/* unlikely for compiler */
 #ifndef yy_unlikely
 #   if yy_has_builtin(__builtin_expect) || __GNUC__ >= 4
 #       define yy_unlikely(expr) __builtin_expect(!!(expr), 0)
@@ -105,7 +106,7 @@
  * Flags
  *============================================================================*/
 
-/* gcc version check */
+/* compiler version (GCC) */
 #ifndef yy_gcc_available
 #   define yy_gcc_available(major, minor, patch) \
         ((__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) >= \
@@ -161,11 +162,12 @@
 
 /* IEEE 754 floating-point binary representation */
 #ifndef YY_HAS_IEEE_754
-#   if __STDC_IEC_559__
+#   if defined(__STDC_IEC_559__) || defined(__STDC_IEC_60559_BFP__)
 #       define YY_HAS_IEEE_754 1
-#   elif (FLT_RADIX == 2) && (DBL_MANT_DIG == 53) && \
-         (DBL_MIN_EXP == -1021) && (DBL_MAX_EXP == 1024) && \
-         (DBL_MIN_10_EXP == -307) && (DBL_MAX_10_EXP == 308)
+#   elif FLT_RADIX == 2 && \
+        DBL_MANT_DIG == 53 && DBL_DIG == 15 && \
+        DBL_MIN_EXP == -1021 && DBL_MAX_EXP == 1024 && \
+        DBL_MIN_10_EXP == -307 && DBL_MAX_10_EXP == 308
 #       define YY_HAS_IEEE_754 1
 #   else
 #       define YY_HAS_IEEE_754 0
@@ -177,6 +179,8 @@
 #endif
 
 /*
+ Correct rounding in double number computations.
+ 
  On the x86 architecture, some compilers may use x87 FPU instructions for
  floating-point arithmetic. The x87 FPU loads all floating point number as
  80-bit double-extended precision internally, then rounds the result to original
@@ -185,7 +189,7 @@
  
  Here are some examples of double precision calculation error:
  
-     2877.0 / 1e6 == 0.002877, but x87 returns 0.0028770000000000002
+     2877.0 / 1e6   == 0.002877,  but x87 returns 0.0028770000000000002
      43683.0 * 1e21 == 4.3683e25, but x87 returns 4.3683000000000004e25
  
  Here are some examples of compiler flags to generate x87 instructions on x86:
@@ -196,8 +200,8 @@
  
  If we are sure that there's no similar error described above, we can define the
  YY_DOUBLE_MATH_CORRECT as 1 to enable the fast path calculation. This is
- not an accurate detection, it's just try to avoid the error at compiler time.
- An accurate detection can be done at runtime:
+ not an accurate detection, it's just try to avoid the error at compile-time.
+ An accurate detection can be done at run-time:
  
      bool is_double_math_correct(void) {
          volatile double r = 43683.0;
@@ -205,48 +209,27 @@
          return r == 4.3683e25;
      }
  
+ See also: utils.h in https://github.com/google/double-conversion/
  */
-#ifndef YY_DOUBLE_MATH_CORRECT
-#   if !defined(FLT_EVAL_METHOD) && defined(__FLT_EVAL_METHOD__)
-#       define FLT_EVAL_METHOD __FLT_EVAL_METHOD__
-#   endif
-#   if defined(FLT_EVAL_METHOD) && FLT_EVAL_METHOD != 0 && FLT_EVAL_METHOD != 1
-#       define YY_DOUBLE_MATH_CORRECT 0
-#   elif defined(i386) || defined(__i386) || defined(__i386__) || \
-        defined(_X86_) || defined(__X86__) || defined(_M_IX86) || \
-        defined(__I86__) || defined(__IA32__) || defined(__THW_INTEL)
-#       if (defined(_MSC_VER) && _M_IX86_FP == 2) || __SSE2_MATH__
-#           define YY_DOUBLE_MATH_CORRECT 1
-#       else
-#           define YY_DOUBLE_MATH_CORRECT 0
-#       endif
-#   elif defined(__x86_64) || defined(__x86_64__) || \
-        defined(__amd64) || defined(__amd64__) || \
-        defined(_M_AMD64) || defined(_M_X64) || \
-        defined(__ia64) || defined(_IA64) || defined(__IA64__) ||  \
-        defined(__ia64__) || defined(_M_IA64) || defined(__itanium__) || \
-        defined(__arm64) || defined(__arm64__) || \
-        defined(__aarch64__) || defined(_M_ARM64) || \
-        defined(__arm) || defined(__arm__) || defined(_ARM_) || \
-        defined(_ARM) || defined(_M_ARM) || defined(__TARGET_ARCH_ARM) || \
-        defined(mips) || defined(__mips) || defined(__mips__) || \
-        defined(MIPS) || defined(_MIPS_) || defined(__MIPS__) || \
-        defined(_ARCH_PPC64) || defined(__PPC64__) || \
-        defined(__ppc64__) || defined(__powerpc64__) || \
-        defined(__powerpc) || defined(__powerpc__) || defined(__POWERPC__) || \
-        defined(__ppc__) || defined(__ppc) || defined(__PPC__) || \
-        defined(__sparcv9) || defined(__sparc_v9__) || \
-        defined(__sparc) || defined(__sparc__) || defined(__sparc64__) || \
-        defined(__alpha) || defined(__alpha__) || defined(_M_ALPHA) || \
-        defined(__or1k__) || defined(__OR1K__) || defined(OR1K) || \
-        defined(__hppa) || defined(__hppa__) || defined(__HPPA__) || \
-        defined(__riscv) || defined(__riscv__) || \
-        defined(__s390__) || defined(__avr32__) || defined(__SH4__) || \
-        defined(__e2k__) || defined(__arc__) || defined(__EMSCRIPTEN__)
+#if !defined(FLT_EVAL_METHOD) && defined(__FLT_EVAL_METHOD__)
+#    define FLT_EVAL_METHOD __FLT_EVAL_METHOD__
+#endif
+
+#if defined(FLT_EVAL_METHOD) && FLT_EVAL_METHOD != 0 && FLT_EVAL_METHOD != 1
+#    define YY_DOUBLE_MATH_CORRECT 0
+#elif defined(i386) || defined(__i386) || defined(__i386__) || \
+    defined(_X86_) || defined(__X86__) || defined(_M_IX86) || \
+    defined(__I86__) || defined(__IA32__) || defined(__THW_INTEL)
+#   if (defined(_MSC_VER) && defined(_M_IX86_FP) && _M_IX86_FP == 2) || \
+        (defined(__SSE2_MATH__) && __SSE2_MATH__)
 #       define YY_DOUBLE_MATH_CORRECT 1
 #   else
-#       define YY_DOUBLE_MATH_CORRECT 0 /* unknown */
+#       define YY_DOUBLE_MATH_CORRECT 0
 #   endif
+#elif defined(__mc68000__) || defined(__pnacl__) || defined(__native_client__)
+#   define YY_DOUBLE_MATH_CORRECT 0
+#else
+#   define YY_DOUBLE_MATH_CORRECT 1
 #endif
 
 
@@ -387,69 +370,33 @@ __extension__ typedef __int128          i128;
 __extension__ typedef unsigned __int128 u128;
 #endif
 
-/** 16/32/64-bit vector */
-typedef struct v16 { char c1, c2; } v16;
-typedef struct v32 { char c1, c2, c3, c4; } v32;
-typedef struct v64 { char c1, c2, c3, c4, c5, c6, c7, c8; } v64;
-
-/** 16/32/64-bit vector union, used for unaligned memory access on modern CPU */
-typedef union v16_uni { v16 v; u16 u; } v16_uni;
-typedef union v32_uni { v32 v; u32 u; } v32_uni;
-typedef union v64_uni { v64 v; u64 u; } v64_uni;
-
-/** 64-bit floating point union, used to avoid the type-based aliasing rule */
-typedef union { u64 u; f64 f; } f64_uni;
-
 
 
 /*==============================================================================
- * Character Utils
+ * Load/Store Utils
  *============================================================================*/
 
-#if (__STDC__ >= 1 && __STDC_VERSION__ >= 199901L)
-
-#define v16_make(c1, c2) \
-    ((v16){c1, c2})
-
-#define v32_make(c1, c2, c3, c4) \
-    ((v32){c1, c2, c3, c4})
-
-#define v64_make(c1, c2, c3, c4, c5, c6, c7, c8) \
-    ((v64){c1, c2, c3, c4, c5, c6, c7, c8})
-
-#else
-
-static_inline v16 v16_make(char c1, char c2) {
-    v16 v;
-    v.c1 = c1;
-    v.c2 = c2;
-    return v;
+static_inline void byte_copy_2(void *dst, const void *src) {
+    memcpy(dst, src, 2);
 }
 
-static_inline v32 v32_make(char c1, char c2, char c3, char c4) {
-    v32 v;
-    v.c1 = c1;
-    v.c2 = c2;
-    v.c3 = c3;
-    v.c4 = c4;
-    return v;
+static_inline void byte_copy_4(void *dst, const void *src) {
+    memcpy(dst, src, 4);
 }
 
-static_inline v64 v64_make(char c1, char c2, char c3, char c4,
-                           char c5, char c6, char c7, char c8) {
-    v64 v;
-    v.c1 = c1;
-    v.c2 = c2;
-    v.c3 = c3;
-    v.c4 = c4;
-    v.c5 = c5;
-    v.c6 = c6;
-    v.c7 = c7;
-    v.c8 = c8;
-    return v;
+static_inline void byte_copy_8(void *dst, const void *src) {
+    memcpy(dst, src, 8);
 }
 
-#endif
+static_inline void byte_move_16(void *dst, const void *src) {
+    char *pdst = (char *)dst;
+    const char *psrc = (const char *)src;
+    u64 tmp1, tmp2;
+    memcpy(&tmp1, psrc, 8);
+    memcpy(&tmp2, psrc + 8, 8);
+    memcpy(pdst, &tmp1, 8);
+    memcpy(pdst + 8, &tmp2, 8);
+}
 
 
 
@@ -459,16 +406,16 @@ static_inline v64 v64_make(char c1, char c2, char c3, char c4,
 
 /** Convert raw binary to double. */
 static_inline f64 f64_from_raw(u64 u) {
-    f64_uni uni;
-    uni.u = u;
-    return uni.f;
+    f64 f;
+    memcpy(&f, &u, sizeof(u));
+    return f;
 }
 
 /** Convert double to raw binary. */
 static_inline u64 f64_to_raw(f64 f) {
-    f64_uni uni;
-    uni.f = f;
-    return uni.u;
+    u64 u;
+    memcpy(&u, &f, sizeof(u));
+    return u;
 }
 
 
@@ -1602,7 +1549,7 @@ static_noinline void bigint_set_buf(bigint *big, u64 sig, i32 *exp,
                     val = val - (val % 10) + 1;
                 }
                 if (len == U64_SAFE_DIG || cur == sig_end) {
-                    bigint_mul_pow10(big, len);
+                    bigint_mul_pow10(big, (i32)len);
                     bigint_add_u64(big, val);
                     val = 0;
                     len = 0;
@@ -1730,6 +1677,7 @@ double yy_string_to_double(const char *str, char **endptr) {
     bool sign = (*hdr == '-');
     cur += sign;
     
+    /* begin with a leading zero or non-digit */
     if (unlikely(!digi_is_nonzero(*cur))) { /* 0 or non-digit char */
         if (unlikely(*cur != '0')) { /* non-digit char */
             double ret;
@@ -1769,7 +1717,6 @@ double yy_string_to_double(const char *str, char **endptr) {
     
     /*
      Read integral part, same as the following code.
-     For more explanation, see the comments under label `skip_ascii_begin`.
      
          for (int i = 1; i <= 18; i++) {
             num = cur[i] - '0';
@@ -1777,16 +1724,10 @@ double yy_string_to_double(const char *str, char **endptr) {
             else goto digi_sepr_i;
          }
      */
-#if yy_is_real_gcc
-#define expr_intg(i) \
-    if (likely((num = (u64)(cur[i] - (u8)'0')) <= 9)) sig = num + sig * 10; \
-    else { __asm volatile("":"=m"(cur[i])::); goto digi_sepr_##i; }
-#else
 #define expr_intg(i) \
     if (likely((num = (u64)(cur[i] - (u8)'0')) <= 9)) sig = num + sig * 10; \
     else { goto digi_sepr_##i; }
-#endif
-    repeat_in_1_18(expr_intg);
+    repeat_in_1_18(expr_intg)
 #undef expr_intg
     
     cur += 19; /* skip continuous 19 digits */
@@ -1806,19 +1747,11 @@ double yy_string_to_double(const char *str, char **endptr) {
 #undef expr_sepr
     
     /* read fraction part */
-#if yy_is_real_gcc
-#define expr_frac(i) \
-    digi_frac_##i: \
-    if (likely((num = (u64)(cur[i + 1] - (u8)'0')) <= 9)) \
-        sig = num + sig * 10; \
-    else { __asm volatile("":"=m"(cur[i + 1])::); goto digi_stop_##i; }
-#else
 #define expr_frac(i) \
     digi_frac_##i: \
     if (likely((num = (u64)(cur[i + 1] - (u8)'0')) <= 9)) \
         sig = num + sig * 10; \
     else { goto digi_stop_##i; }
-#endif
     repeat_in_1_18(expr_frac)
 #undef expr_frac
     
@@ -1834,7 +1767,8 @@ double yy_string_to_double(const char *str, char **endptr) {
     repeat_in_1_18(expr_stop)
 #undef expr_stop
     
-digi_intg_more: /* read more digits in integral part */
+    /* read more digits in integral part */
+digi_intg_more:
     if (digi_is_digit(*cur)) {
         if (!digi_is_digit_or_fp(cur[1])) {
             /* this number is an integer with 20 digits */
@@ -1861,7 +1795,8 @@ digi_intg_more: /* read more digits in integral part */
         }
     }
     
-digi_frac_more: /* read more digits in fraction part */
+    /* read more digits in fraction part */
+digi_frac_more:
     sig_cut = cur; /* too large to fit in u64, excess digits need to be cut */
     sig += (*cur >= '5'); /* round */
     while (digi_is_digit(*++cur));
@@ -1889,7 +1824,8 @@ digi_frac_more: /* read more digits in fraction part */
     if (digi_is_exp(*cur)) goto digi_exp_more;
     goto digi_exp_finish;
     
-digi_frac_end: /* fraction part end */
+    /* fraction part end */
+digi_frac_end:
     if (unlikely(dot_pos + 1 == cur)) {
         return_err(); /* no digit after decimal point */
     }
@@ -1905,7 +1841,8 @@ digi_frac_end: /* fraction part end */
         goto digi_exp_more;
     }
     
-digi_exp_more: /* read exponent part */
+    /* read exponent part */
+digi_exp_more:
     exp_sign = (*++cur == '-');
     cur += digi_is_sign(*cur);
     if (unlikely(!digi_is_digit(*cur))) {
@@ -1916,7 +1853,7 @@ digi_exp_more: /* read exponent part */
     /* read exponent literal */
     tmp = cur;
     while (digi_is_digit(*cur)) {
-        exp_lit = (*cur++ - '0') + (u64)exp_lit * 10;
+        exp_lit = (i64)((u8)(*cur++ - '0') + (u64)exp_lit * 10);
     }
     if (unlikely(cur - tmp >= U64_SAFE_DIG)) {
         if (exp_sign) {
@@ -1927,7 +1864,8 @@ digi_exp_more: /* read exponent part */
     }
     exp_sig += exp_sign ? -exp_lit : exp_lit;
     
-digi_exp_finish: /* validate exponent value */
+    /* validate exponent value */
+digi_exp_finish:
     if (unlikely(exp_sig < F64_MIN_DEC_EXP - 19)) {
         return_f64_raw(0); /* underflow */
     }
@@ -1936,7 +1874,8 @@ digi_exp_finish: /* validate exponent value */
     }
     exp = (i32)exp_sig;
     
-digi_finish: /* all digit read finished */
+    /* all digit read finished */
+digi_finish:
     
     /*
      Fast path 1:
@@ -2228,41 +2167,12 @@ digi_finish: /* all digit read finished */
         }
         return_f64_raw(raw);
     }
+    return 0.0;
     
-#undef has_flag
 #undef return_err
-#undef return_u64
 #undef return_f64
 #undef return_f64_raw
-    
-    return 0.0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2311,19 +2221,19 @@ static_inline u8 *write_u32_len_8(u32 val, u8 *buf) {
     cc = (ccdd * 5243) >> 19; /* (ccdd / 100) */
     bb = aabb - aa * 100; /* (aabb % 100) */
     dd = ccdd - cc * 100; /* (ccdd % 100) */
-    ((v16 *)buf)[0] = ((v16 *)digit_table)[aa];
-    ((v16 *)buf)[1] = ((v16 *)digit_table)[bb];
-    ((v16 *)buf)[2] = ((v16 *)digit_table)[cc];
-    ((v16 *)buf)[3] = ((v16 *)digit_table)[dd];
+    byte_copy_2(buf + 0, digit_table + aa * 2);
+    byte_copy_2(buf + 2, digit_table + bb * 2);
+    byte_copy_2(buf + 4, digit_table + cc * 2);
+    byte_copy_2(buf + 6, digit_table + dd * 2);
     return buf + 8;
 }
 
-static_inline u8 *write_u32_len_1_8(u32 val, u8 *buf) {
+static_inline u8 *write_u32_len_1_to_8(u32 val, u8 *buf) {
     u32 aa, bb, cc, dd, aabb, bbcc, ccdd, lz;
     
     if (val < 100) { /* 1-2 digits: aa */
         lz = val < 10;
-        ((v16 *)buf)[0] = *(v16 *)&(digit_table[val * 2 + lz]);
+        byte_copy_2(buf + 0, digit_table + val * 2 + lz);
         buf -= lz;
         return buf + 2;
         
@@ -2331,9 +2241,9 @@ static_inline u8 *write_u32_len_1_8(u32 val, u8 *buf) {
         aa = (val * 5243) >> 19; /* (val / 100) */
         bb = val - aa * 100; /* (val % 100) */
         lz = aa < 10;
-        ((v16 *)buf)[0] = *(v16 *)&(digit_table[aa * 2 + lz]);
+        byte_copy_2(buf + 0, digit_table + aa * 2 + lz);
         buf -= lz;
-        ((v16 *)buf)[1] = ((v16 *)digit_table)[bb];
+        byte_copy_2(buf + 2, digit_table + bb * 2);
         return buf + 4;
         
     } else if (val < 1000000) { /* 5-6 digits: aabbcc */
@@ -2342,10 +2252,10 @@ static_inline u8 *write_u32_len_1_8(u32 val, u8 *buf) {
         bb = (bbcc * 5243) >> 19; /* (bbcc / 100) */
         cc = bbcc - bb * 100; /* (bbcc % 100) */
         lz = aa < 10;
-        ((v16 *)buf)[0] = *(v16 *)&(digit_table[aa * 2 + lz]);
+        byte_copy_2(buf + 0, digit_table + aa * 2 + lz);
         buf -= lz;
-        ((v16 *)buf)[1] = ((v16 *)digit_table)[bb];
-        ((v16 *)buf)[2] = ((v16 *)digit_table)[cc];
+        byte_copy_2(buf + 2, digit_table + bb * 2);
+        byte_copy_2(buf + 4, digit_table + cc * 2);
         return buf + 6;
         
     } else { /* 7-8 digits: aabbccdd */
@@ -2356,11 +2266,11 @@ static_inline u8 *write_u32_len_1_8(u32 val, u8 *buf) {
         bb = aabb - aa * 100; /* (aabb % 100) */
         dd = ccdd - cc * 100; /* (ccdd % 100) */
         lz = aa < 10;
-        ((v16 *)buf)[0] = *(v16 *)&(digit_table[aa * 2 + lz]);
+        byte_copy_2(buf + 0, digit_table + aa * 2 + lz);
         buf -= lz;
-        ((v16 *)buf)[1] = ((v16 *)digit_table)[bb];
-        ((v16 *)buf)[2] = ((v16 *)digit_table)[cc];
-        ((v16 *)buf)[3] = ((v16 *)digit_table)[dd];
+        byte_copy_2(buf + 2, digit_table + bb * 2);
+        byte_copy_2(buf + 4, digit_table + cc * 2);
+        byte_copy_2(buf + 6, digit_table + dd * 2);
         return buf + 8;
     }
 }
@@ -2391,12 +2301,12 @@ static_inline u8 *write_u64_len_1_to_16(u64 val, u8 *buf) {
     u64 hgh;
     u32 low;
     if (val < 100000000) { /* 1-8 digits */
-        buf = write_u32_len_1_8((u32)val, buf);
+        buf = write_u32_len_1_to_8((u32)val, buf);
         return buf;
     } else { /* 9-16 digits */
         hgh = val / 100000000;
         low = (u32)(val - hgh * 100000000); /* (val % 100000000) */
-        buf = write_u32_len_1_8((u32)hgh, buf);
+        buf = write_u32_len_1_to_8((u32)hgh, buf);
         buf = write_u32_len_8(low, buf);
         return buf;
     }
@@ -2419,109 +2329,101 @@ static_inline u8 *write_u64_len_1_to_17(u64 val, u8 *buf) {
     } else if (val >= (u64)100000000){ /* len: 9 to 15 */
         hgh = val / 100000000;
         low = (u32)(val - hgh * 100000000); /* (val % 100000000) */
-        buf = write_u32_len_1_8((u32)hgh, buf);
+        buf = write_u32_len_1_to_8((u32)hgh, buf);
         buf = write_u32_len_8(low, buf);
         return buf;
     } else { /* len: 1 to 8 */
-        buf = write_u32_len_1_8((u32)val, buf);
+        buf = write_u32_len_1_to_8((u32)val, buf);
         return buf;
     }
 }
 
 /**
- Write an unsigned integer with a length of 16 to 17 with trailing zero trimmed.
+ Write an unsigned integer with a length of 16 or 17 with trailing zero trimmed.
+ These digits are named as "abbccddeeffgghhii" here.
+ For example, input 1234567890123000, output "1234567890123".
  */
-static_inline u8 *write_u64_len_15_to_17_trim(u8 *buf, u64 sig) {
-    /* The decimal digits are named as abbccddeeffgghhii. */
-    bool lz;
-    u32 tz1, tz2, tz;
+static_inline u8 *write_u64_len_16_to_17_trim(u64 val, u8 *buf) {
+    u32 tz, tz1, tz2;
     
-    u32 abbccddee = (u32)(sig / 100000000);
-    u32 ffgghhii = (u32)(sig - (u64)abbccddee * 100000000);
+    u32 abbccddee = (u32)(val / 100000000);
+    u32 ffgghhii = (u32)(val - (u64)abbccddee * 100000000);
     u32 abbcc = abbccddee / 10000;
     u32 ddee = abbccddee - abbcc * 10000;
-    u32 abb = (u32)(((u64)abbcc * 167773) >> 24); /* abbcc / 100 */
-    u32 a = (abb * 41) >> 12; /* abb / 100 */
-    u32 bb = abb - a * 100;
-    u32 cc = abbcc - abb * 100;
-    
-    /* write abbcc */
+    u32 abb = (u32)(((u64)abbcc * 167773) >> 24);   /* (abbcc / 100) */
+    u32 a = (abb * 41) >> 12;                       /* (abb / 100) */
+    u32 bb = abb - a * 100;                         /* (abb % 100) */
+    u32 cc = abbcc - abb * 100;                     /* (abbcc % 100) */
     buf[0] = (u8)(a + '0');
     buf += a > 0;
-    lz = bb < 10 && a == 0;
-    ((v16 *)buf)[0] = *(v16 *)&(digit_table[bb * 2 + lz]);
-    buf -= lz;
-    ((v16 *)buf)[1] = ((v16 *)digit_table)[cc];
+    byte_copy_2(buf + 0, digit_table + bb * 2);
+    byte_copy_2(buf + 2, digit_table + cc * 2);
     
     if (ffgghhii) {
-        u32 dd = (ddee * 5243) >> 19; /* (ddee / 100) */
-        u32 ee = ddee - dd * 100; /* (ddee % 100) */
+        u32 dd = (ddee * 5243) >> 19;               /* (ddee / 100) */
+        u32 ee = ddee - dd * 100;                   /* (ddee % 100) */
         u32 ffgg = (u32)(((u64)ffgghhii * 109951163) >> 40); /* (val / 10000) */
-        u32 hhii = ffgghhii - ffgg * 10000; /* (val % 10000) */
-        u32 ff = (ffgg * 5243) >> 19; /* (aabb / 100) */
-        u32 gg = ffgg - ff * 100; /* (aabb % 100) */
-        ((v16 *)buf)[2] = ((v16 *)digit_table)[dd];
-        ((v16 *)buf)[3] = ((v16 *)digit_table)[ee];
-        ((v16 *)buf)[4] = ((v16 *)digit_table)[ff];
-        ((v16 *)buf)[5] = ((v16 *)digit_table)[gg];
+        u32 hhii = ffgghhii - ffgg * 10000;         /* (val % 10000) */
+        u32 ff = (ffgg * 5243) >> 19;               /* (aabb / 100) */
+        u32 gg = ffgg - ff * 100;                   /* (aabb % 100) */
+        byte_copy_2(buf + 4, digit_table + dd * 2);
+        byte_copy_2(buf + 6, digit_table + ee * 2);
+        byte_copy_2(buf + 8, digit_table + ff * 2);
+        byte_copy_2(buf + 10, digit_table + gg * 2);
         if (hhii) {
-            u32 hh = (hhii * 5243) >> 19; /* (ccdd / 100) */
-            u32 ii = hhii - hh * 100; /* (ccdd % 100) */
-            ((v16 *)buf)[6] = ((v16 *)digit_table)[hh];
-            ((v16 *)buf)[7] = ((v16 *)digit_table)[ii];
+            u32 hh = (hhii * 5243) >> 19;           /* (ccdd / 100) */
+            u32 ii = hhii - hh * 100;               /* (ccdd % 100) */
+            byte_copy_2(buf + 12, digit_table + hh * 2);
+            byte_copy_2(buf + 14, digit_table + ii * 2);
             tz1 = dec_trailing_zero_table[hh];
             tz2 = dec_trailing_zero_table[ii];
             tz = ii ? tz2 : (tz1 + 2);
-            buf += 16 - tz;
-            return buf;
+            return buf + 16 - tz;
         } else {
             tz1 = dec_trailing_zero_table[ff];
             tz2 = dec_trailing_zero_table[gg];
             tz = gg ? tz2 : (tz1 + 2);
-            buf += 12 - tz;
-            return buf;
+            return buf + 12 - tz;
         }
     } else {
         if (ddee) {
-            u32 dd = (ddee * 5243) >> 19; /* (ddee / 100) */
-            u32 ee = ddee - dd * 100; /* (ddee % 100) */
-            ((v16 *)buf)[2] = ((v16 *)digit_table)[dd];
-            ((v16 *)buf)[3] = ((v16 *)digit_table)[ee];
+            u32 dd = (ddee * 5243) >> 19;           /* (ddee / 100) */
+            u32 ee = ddee - dd * 100;               /* (ddee % 100) */
+            byte_copy_2(buf + 4, digit_table + dd * 2);
+            byte_copy_2(buf + 6, digit_table + ee * 2);
             tz1 = dec_trailing_zero_table[dd];
             tz2 = dec_trailing_zero_table[ee];
             tz = ee ? tz2 : (tz1 + 2);
-            buf += 8 - tz;
-            return buf;
+            return buf + 8 - tz;
         } else {
             tz1 = dec_trailing_zero_table[bb];
             tz2 = dec_trailing_zero_table[cc];
             tz = cc ? tz2 : (tz1 + tz2);
-            buf += 4 - tz;
-            return buf;
+            return buf + 4 - tz;
         }
     }
 }
 
-/** Write a signed integer in the range -324 to 308. */
+/** Write exponent part in range `e-324` to `e308`. */
 static_inline u8 *write_f64_exp(i32 exp, u8 *buf) {
-    buf[0] = '-';
-    buf += exp < 0;
+    byte_copy_2(buf, "e-");
+    buf += 2 - (exp >= 0);
     exp = exp < 0 ? -exp : exp;
     if (exp < 100) {
-        u32 lz = exp < 10;
-        *(v16 *)&buf[0] = *(v16 *)&digit_table[exp * 2 + lz];
+        bool lz = exp < 10;
+        byte_copy_2(buf + 0, digit_table + (u32)exp * 2 + lz);
         return buf + 2 - lz;
     } else {
-        u32 hi = (exp * 656) >> 16; /* exp / 100 */
-        u32 lo = exp - hi * 100; /* exp % 100 */
-        buf[0] = (u8)hi + (u8)'0';
-        *(v16 *)&buf[1] = *(v16 *)&digit_table[lo * 2];
+        u32 hi = ((u32)exp * 656) >> 16;    /* exp / 100 */
+        u32 lo = (u32)exp - hi * 100;       /* exp % 100 */
+        buf[0] = (u8)((u8)hi + (u8)'0');
+        byte_copy_2(buf + 1, digit_table + lo * 2);
         return buf + 3;
     }
 }
 
 /** Multiplies 128-bit integer and returns highest 64-bit rounded value. */
-static_inline u64 round_to_odd(u64 hi, u64 lo, u64 cp) {
+static_inline u64 u128_round_to_odd(u64 hi, u64 lo, u64 cp) {
     u64 x_hi, x_lo, y_hi, y_lo;
     u128_mul(cp, lo, &x_hi, &x_lo);
     u128_mul_add(cp, hi, x_hi, &y_hi, &y_lo);
@@ -2532,86 +2434,125 @@ static_inline u64 round_to_odd(u64 hi, u64 lo, u64 cp) {
  Convert double number from binary to decimal.
  The output significand is shortest decimal but may have trailing zeros.
  
- This function use the Schubfach algorithm:
- Raffaello Giulietti, The Schubfach way to render doubles, 2020.
- https://drive.google.com/open?id=1luHhyQF9zKlM8yJ1nebU0OgVYhfC6CBN
- https://github.com/abolz/Drachennest
- 
- See also:
- Dragonbox: A New Floating-Point Binary-to-Decimal Conversion Algorithm, 2020.
- https://github.com/jk-jeon/dragonbox/blob/master/other_files/Dragonbox.pdf
- https://github.com/jk-jeon/dragonbox
- 
  @param sig_raw The raw value of significand in IEEE 754 format.
  @param exp_raw The raw value of exponent in IEEE 754 format.
  @param sig_bin The decoded value of significand in binary.
  @param exp_bin The decoded value of exponent in binary.
  @param sig_dec The output value of significand in decimal.
  @param exp_dec The output value of exponent in decimal.
- @warning The input double number should not be 0, inf, nan.
+ @warning The input double number should not be 0, inf or nan.
  */
-static_inline void f64_bin_to_dec(u64 sig_raw, i32 exp_raw,
+static_inline void f64_bin_to_dec(u64 sig_raw, u32 exp_raw,
                                   u64 sig_bin, i32 exp_bin,
                                   u64 *sig_dec, i32 *exp_dec) {
     
-    bool is_even, lower_bound_closer, u_inside, w_inside, round_up;
-    u64 s, sp, cb, cbl, cbr, vb, vbl, vbr, pow10hi, pow10lo, upper, lower, mid;
-    i32 k, h, exp10;
+    bool is_even, irregular, round_up, trim;
+    bool u0_inside, u1_inside, w0_inside, w1_inside;
+    u64 s, sp, cb, cbl, cbr, vb, vbl, vbr, p10_hi, p10_lo, upper, lower, mid;
+    i32 k, h;
     
+    /*
+     Fast path:
+     For regular spacing significand 'c', there are 4 candidates:
+     
+             u0             u1 c  w1                            w0
+     ----|----|----|----|----|-*--|----|----|----|----|----|----|----|----
+         9    0    1    2    3    4    5    6    7    8    9    0    1
+           |___________________|___________________|
+                             1ulp
+     
+     The `1ulp` is in the range [1.0, 10.0).
+     If (c - 0.5ulp < u0), trim the last digit and round down.
+     If (c + 0.5ulp > w0), trim the last digit and round up.
+     If (c - 0.5ulp < u1), round down.
+     If (c + 0.5ulp > w1), round up.
+     */
+    while (likely(sig_raw)) {
+        u64 mod, dec, add_1, add_10, s_hi, s_lo;
+        u64 c, half_ulp, t0, t1;
+        
+        /* k = floor(exp_bin * log10(2)); */
+        /* h = exp_bin + floor(log2(10) * -k); (h = 0/1/2/3) */
+        k = (i32)(exp_bin * 315653) >> 20;
+        h = exp_bin + ((-k * 217707) >> 16);
+        pow10_table_get_sig(-k, &p10_hi, &p10_lo);
+        
+        /* sig_bin << (1/2/3/4) */
+        cb = sig_bin << (h + 1);
+        u128_mul(cb, p10_lo, &s_hi, &s_lo);
+        u128_mul_add(cb, p10_hi, s_hi, &s_hi, &s_lo);
+        mod = s_hi % 10;
+        dec = s_hi - mod;
+        
+        /* right shift 4 to fit in u64 */
+        c = (mod << (64 - 4)) | (s_lo >> 4);
+        half_ulp = p10_hi >> (4 - h);
+        
+        /* check w1, u0, w0 range */
+        w1_inside = (s_lo >= ((u64)1 << 63));
+        if (unlikely(s_lo == ((u64)1 << 63))) break;
+        u0_inside = (half_ulp >= c);
+        if (unlikely(half_ulp == c)) break;
+        t0 = ((u64)10 << (64 - 4));
+        t1 = c + half_ulp;
+        w0_inside = (t1 >= t0);
+        if (unlikely(t0 - t1 <= (u64)1)) break;
+        
+        trim = (u0_inside | w0_inside);
+        add_10 = (w0_inside ? 10 : 0);
+        add_1 = mod + w1_inside;
+        *sig_dec = dec + (trim ? add_10 : add_1);
+        *exp_dec = k;
+        return;
+    }
+    
+    /*
+     Schubfach algorithm:
+     Raffaello Giulietti, The Schubfach way to render doubles, 2022.
+     https://drive.google.com/file/d/1gp5xv4CAa78SVgCeWfGqqI4FfYYYuNFb (Paper)
+     https://github.com/openjdk/jdk/pull/3402 (Java implementation)
+     https://github.com/abolz/Drachennest (C++ implementation)
+     */
+    irregular = (sig_raw == 0 && exp_raw > 1);
     is_even = !(sig_bin & 1);
-    lower_bound_closer = (sig_raw == 0 && exp_raw > 1);
-    
-    cbl = 4 * sig_bin - 2 + lower_bound_closer;
+    cbl = 4 * sig_bin - 2 + irregular;
     cb  = 4 * sig_bin;
     cbr = 4 * sig_bin + 2;
     
-    /* exp_bin: [-1074, 971]                                                  */
-    /* k = lower_bound_closer ? floor(log10(pow(2, exp_bin)))                 */
-    /*                        : floor(log10(pow(2, exp_bin) * 3.0 / 4.0))     */
-    /*   = lower_bound_closer ? floor(exp_bin * log10(2))                     */
-    /*                        : floor(exp_bin * log10(2) + log10(3.0 / 4.0))  */
-    k = (i32)(exp_bin * 315653 - (lower_bound_closer ? 131237 : 0)) >> 20;
+    /* k = floor(exp_bin * log10(2) + (irregular ? log10(3.0 / 4.0) : 0)); */
+    /* h = exp_bin + floor(log2(10) * -k) + 1; (h = 1/2/3/4) */
+    k = (i32)(exp_bin * 315653 - (irregular ? 131237 : 0)) >> 20;
+    h = exp_bin + ((-k * 217707) >> 16) + 1;
+    pow10_table_get_sig(-k, &p10_hi, &p10_lo);
+    p10_lo += 1;
     
-    /* k: [-324, 292]                                                         */
-    /* h = exp_bin + floor(log2(pow(10, e)))                                  */
-    /*   = exp_bin + floor(log2(10) * e)                                      */
-    exp10 = -k;
-    h = exp_bin + ((exp10 * 217707) >> 16) + 1;
-    
-    pow10_table_get_sig(exp10, &pow10hi, &pow10lo);
-    pow10lo += (exp10 < POW10_SIG_TABLE_MIN_EXACT_EXP ||
-                exp10 > POW10_SIG_TABLE_MAX_EXACT_EXP);
-    vbl = round_to_odd(pow10hi, pow10lo, cbl << h);
-    vb  = round_to_odd(pow10hi, pow10lo, cb  << h);
-    vbr = round_to_odd(pow10hi, pow10lo, cbr << h);
-    
+    vbl = u128_round_to_odd(p10_hi, p10_lo, cbl << h);
+    vb  = u128_round_to_odd(p10_hi, p10_lo, cb  << h);
+    vbr = u128_round_to_odd(p10_hi, p10_lo, cbr << h);
     lower = vbl + !is_even;
     upper = vbr - !is_even;
     
     s = vb / 4;
     if (s >= 10) {
         sp = s / 10;
-        u_inside = (lower <= 40 * sp);
-        w_inside = (upper >= 40 * sp + 40);
-        if (u_inside != w_inside) {
-            *sig_dec = sp + w_inside;
-            *exp_dec = k + 1;
+        u0_inside = (lower <= 40 * sp);
+        w0_inside = (upper >= 40 * sp + 40);
+        if (u0_inside != w0_inside) {
+            *sig_dec = sp * 10 + (w0_inside ? 10 : 0);
+            *exp_dec = k;
             return;
         }
     }
-    
-    u_inside = (lower <= 4 * s);
-    w_inside = (upper >= 4 * s + 4);
-    
+    u1_inside = (lower <= 4 * s);
+    w1_inside = (upper >= 4 * s + 4);
     mid = 4 * s + 2;
     round_up = (vb > mid) || (vb == mid && (s & 1) != 0);
-    
-    *sig_dec = s + ((u_inside != w_inside) ? w_inside : round_up);
+    *sig_dec = s + ((u1_inside != w1_inside) ? w1_inside : round_up);
     *exp_dec = k;
 }
 
 /**
- Write a double number (require 32 bytes).
+ Write a double number (require 40 bytes).
  
  We follows the ECMAScript specification to print floating point numbers,
  but with the following changes:
@@ -2619,110 +2560,102 @@ static_inline void f64_bin_to_dec(u64 sig_raw, i32 exp_raw,
  2. Keep decimal point to indicate the number is floating point.
  3. Remove positive sign of exponent part.
 */
-static_noinline u8 *write_f64_raw(u8 *buf, u64 raw) {
+static_inline u8 *write_f64_raw(u8 *buf, u64 raw) {
     u64 sig_bin, sig_dec, sig_raw;
-    i32 exp_bin, exp_dec, sig_len, dot_pos, i, max;
-    u32 exp_raw, hi, lo;
-    u8 *hdr, *num_hdr, *num_end, *dot_end;
+    i32 exp_bin, exp_dec, sig_len, dot_ofs;
+    u32 exp_raw;
+    u8 *end;
     bool sign;
     
-    /* decode from raw bytes from IEEE-754 double format. */
+    /* decode raw bytes from IEEE-754 double format. */
     sign = (bool)(raw >> (F64_BITS - 1));
     sig_raw = raw & F64_SIG_MASK;
-    exp_raw = (raw & F64_EXP_MASK) >> F64_SIG_BITS;
+    exp_raw = (u32)((raw & F64_EXP_MASK) >> F64_SIG_BITS);
     
-    /* return inf and nan */
+    /* return inf or nan */
     if (unlikely(exp_raw == ((u32)1 << F64_EXP_BITS) - 1)) {
         if (sig_raw == 0) {
             buf[0] = '-';
             buf += sign;
-            *(v32 *)&buf[0] = v32_make('I', 'n', 'f', 'i');
-            *(v32 *)&buf[4] = v32_make('n', 'i', 't', 'y');
-            buf += 8;
-            return buf;
+            byte_copy_8(buf, "Infinity");
+            return buf + 8;
         } else {
-            *(v32 *)&buf[0] = v32_make('N', 'a', 'N', '\0');
+            byte_copy_4(buf, "NaN");
             return buf + 3;
         }
     }
     
-    /* add sign for all finite double value, include -0.0 */
+    /* add sign for all finite number */
     buf[0] = '-';
     buf += sign;
-    hdr = buf;
     
     /* return zero */
-    if ((raw << 1) == 0) {
-        *(v32 *)&buf[0] = v32_make('0', '.', '0', '\0');
-        buf += 3;
-        return buf;
+    if (unlikely((raw << 1) == 0)) {
+        byte_copy_4(buf, "0.0");
+        return buf + 3;
     }
     
     if (likely(exp_raw != 0)) {
         /* normal number */
-        sig_bin =  sig_raw | ((u64)1 << F64_SIG_BITS);
+        sig_bin = sig_raw | ((u64)1 << F64_SIG_BITS);
         exp_bin = (i32)exp_raw - F64_EXP_BIAS - F64_SIG_BITS;
         
         /* fast path for small integer number without fraction */
-        if (-F64_SIG_BITS <= exp_bin && exp_bin <= 0) {
-            if (u64_tz_bits(sig_bin) >= (u32)-exp_bin) {
-                /* number is integer in range 1 to 0x1FFFFFFFFFFFFF */
-                sig_dec = sig_bin >> -exp_bin;
-                exp_dec = 0;
-                buf = write_u64_len_1_to_16(sig_dec, buf);
-                *(v16 *)buf = v16_make('.', '0');
-                buf += 2;
-                return buf;
-            }
+        if ((-F64_SIG_BITS <= exp_bin && exp_bin <= 0) &&
+            (u64_tz_bits(sig_bin) >= (u32)-exp_bin)) {
+            sig_dec = sig_bin >> -exp_bin; /* range: [1, 0x1FFFFFFFFFFFFF] */
+            buf = write_u64_len_1_to_16(sig_dec, buf);
+            byte_copy_2(buf, ".0");
+            return buf + 2;
         }
         
         /* binary to decimal */
         f64_bin_to_dec(sig_raw, exp_raw, sig_bin, exp_bin, &sig_dec, &exp_dec);
         
-        /* the sig length is 15 to 17 */
-        sig_len = 17;
-        sig_len -= (sig_dec < (u64)100000000 * 100000000);
-        sig_len -= (sig_dec < (u64)100000000 * 10000000);
+        /* the sig length is 16 or 17 */
+        sig_len = 16 + (sig_dec >= (u64)100000000 * 100000000);
         
-        /* the decimal point position relative to the first digit */
-        dot_pos = sig_len + exp_dec;
+        /* the decimal point offset relative to the first digit */
+        dot_ofs = sig_len + exp_dec;
         
-        if (-6 < dot_pos && dot_pos <= 21) {
-            /* no need to write exponent part */
-            if (dot_pos <= 0) {
-                /* dot before first digit */
-                /* such as 0.1234, 0.000001234 */
-                num_hdr = hdr + (2 - dot_pos);
-                num_end = write_u64_len_15_to_17_trim(num_hdr, sig_dec);
-                hdr[0] = '0';
-                hdr[1] = '.';
-                hdr += 2;
-                max = -dot_pos;
-                for (i = 0; i < max; i++) hdr[i] = '0';
-                return num_end;
-            } else {
-                /* dot after first digit */
-                /* such as 1.234, 1234.0, 123400000000000000000.0 */
-                memset(hdr +  0, '0', 8);
-                memset(hdr +  8, '0', 8);
-                memset(hdr + 16, '0', 8);
-                num_hdr = hdr + 1;
-                num_end = write_u64_len_15_to_17_trim(num_hdr, sig_dec);
-                for (i = 0; i < dot_pos; i++) hdr[i] = hdr[i + 1];
-                hdr[dot_pos] = '.';
-                dot_end = hdr + dot_pos + 2;
-                return dot_end < num_end ? num_end : dot_end;
-            }
+        if (likely(-6 < dot_ofs && dot_ofs <= 21)) {
+            i32 num_sep_pos, dot_set_pos, pre_ofs;
+            u8 *num_hdr, *num_end, *num_sep, *dot_end;
+            bool no_pre_zero;
+            
+            /* fill zeros */
+            memset(buf, '0', 32);
+            
+            /* not prefixed with zero, e.g. 1.234, 1234.0 */
+            no_pre_zero = (dot_ofs > 0);
+            
+            /* write the number as digits */
+            pre_ofs = no_pre_zero ? 0 : (2 - dot_ofs);
+            num_hdr = buf + pre_ofs;
+            num_end = write_u64_len_16_to_17_trim(sig_dec, num_hdr);
+            
+            /* seperate these digits to leave a space for dot */
+            num_sep_pos = no_pre_zero ? dot_ofs : 0;
+            num_sep = num_hdr + num_sep_pos;
+            byte_move_16(num_sep + no_pre_zero, num_sep);
+            num_end += no_pre_zero;
+            
+            /* write the dot */
+            dot_set_pos = yy_max(dot_ofs, 1);
+            buf[dot_set_pos] = '.';
+            
+            /* return the ending */
+            dot_end = buf + dot_ofs + 2;
+            return yy_max(dot_end, num_end);
+            
         } else {
-            /* write with scientific notation */
-            /* such as 1.234e56 */
-            u8 *end = write_u64_len_15_to_17_trim(buf + 1, sig_dec);
+            /* write with scientific notation, e.g. 1.234e56 */
+            end = write_u64_len_16_to_17_trim(sig_dec, buf + 1);
+            end -= (end == buf + 2); /* remove '.0', e.g. 2.0e34 -> 2e34 */
             exp_dec += sig_len - 1;
-            hdr[0] = hdr[1];
-            hdr[1] = '.';
-            end[0] = 'e';
-            buf = write_f64_exp(exp_dec, end + 1);
-            return buf;
+            buf[0] = buf[1];
+            buf[1] = '.';
+            return write_f64_exp(exp_dec, end);
         }
         
     } else {
@@ -2734,28 +2667,19 @@ static_noinline u8 *write_f64_raw(u8 *buf, u64 raw) {
         f64_bin_to_dec(sig_raw, exp_raw, sig_bin, exp_bin, &sig_dec, &exp_dec);
         
         /* write significand part */
-        buf = write_u64_len_1_to_17(sig_dec, buf + 1);
-        hdr[0] = hdr[1];
-        hdr[1] = '.';
-        do {
-            buf--;
-            exp_dec++;
-        } while (*buf == '0');
-        exp_dec += buf - hdr - 2;
-        buf += (*buf != '.');
-        buf[0] = 'e';
-        buf++;
+        end = write_u64_len_1_to_17(sig_dec, buf + 1);
+        buf[0] = buf[1];
+        buf[1] = '.';
+        exp_dec += (i32)(end - buf) - 2;
+        
+        /* trim trailing zeros */
+        end -= *(end - 1) == '0'; /* branchless for last zero */
+        end -= *(end - 1) == '0'; /* branchless for second last zero */
+        while (*(end - 1) == '0') end--; /* for unlikely more zeros */
+        end -= *(end - 1) == '.'; /* remove dot, e.g. 2.e-321 -> 2e-321 */
         
         /* write exponent part */
-        buf[0] = '-';
-        buf++;
-        exp_dec = -exp_dec;
-        hi = (exp_dec * 656) >> 16; /* exp / 100 */
-        lo = exp_dec - hi * 100; /* exp % 100 */
-        buf[0] = (u8)hi + (u8)'0';
-        *(v16 *)&buf[1] = *(v16 *)&digit_table[lo * 2];
-        buf += 3;
-        return buf;
+        return write_f64_exp(exp_dec, end);
     }
 }
 

@@ -21,23 +21,10 @@ if(MSVC)
     add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 endif()
 
-if (CMAKE_BUILD_TYPE MATCHES "Release")
-    include(CheckCXXCompilerFlag)
-    CHECK_CXX_COMPILER_FLAG("-march=native" COMPILER_SUPPORT_NATIVE_ARCH)
-    if (COMPILER_SUPPORT_NATIVE_ARCH)
-        message("Add -march=native flag")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
-    endif()
-endif()
 
 # ------------------------------------------------------------------------------
 # vendor
 set(vendors "")
-
-# abseil
-add_subdirectory(vendor/abseil-cpp)
-list(APPEND vendors "absl_strings")
 
 # fmt
 add_subdirectory(vendor/fmt)
@@ -130,35 +117,20 @@ foreach(run_name ${run_names})
         "src/${run_name}/*.c" 
         "src/${run_name}/*.cpp"
     )
-    if(IOS)
-        set(INFO_PLIST_BUNDLE_ID "com.benchmark.${run_name}")
-        configure_file(
-            "${CMAKE_CURRENT_SOURCE_DIR}/src/main/ios/Info.plist"
-            "${CMAKE_CURRENT_BINARY_DIR}/Info_${run_name}.plist"
-            @ONLY
-        )
-        unset(INFO_PLIST_BUNDLE_ID)
-        list(APPEND SOURCES
-            "src/main/ios/main.m"    
-            "src/main/ios/LaunchScreen.storyboard"
-            "${CMAKE_CURRENT_BINARY_DIR}/Info_${run_name}.plist"
-        )
-    else()
-        list(APPEND SOURCES "src/main/console/main.c")
-    endif()
+    list(APPEND SOURCES "src/main/main.c")
     target_sources("run_${run_name}" PRIVATE ${SOURCES})
     target_include_directories("run_${run_name}" PRIVATE "src/${run_name}")
 
     # add links
-    if(IOS)
-        find_library(libUIKit UIKit)
-        find_library(libWebKit WebKit)
-        target_link_libraries("run_${run_name}" ${libUIKit} ${libWebKit})
-        set_target_properties("run_${run_name}" PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_BINARY_DIR}/Info_${run_name}.plist")
-        set_target_properties("run_${run_name}" PROPERTIES RESOURCE "${CMAKE_CURRENT_BINARY_DIR}/data")
-    endif()
     target_link_libraries("run_${run_name}" PRIVATE ${vendors})
 
+    # align all functions 64 bytes
+    if (CMAKE_C_COMPILER_ID MATCHES "Clang")
+        target_compile_options("run_${run_name}" PRIVATE "-mllvm" "-align-all-functions=7")
+    elseif (CMAKE_C_COMPILER_ID MATCHES "GNU")
+        target_compile_options("run_${run_name}" PRIVATE "-falign-functions=64")
+    endif()
+    
 endforeach()
 
 # config project

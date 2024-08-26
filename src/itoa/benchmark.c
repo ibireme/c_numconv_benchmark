@@ -319,8 +319,8 @@ static void fill_rand_i64_len(i64 *buf, u32 count, u32 len) {
 /*----------------------------------------------------------------------------*/
 
 static void itoa_group_benchmark_all(const char *report_file_path) {
-    static const u32 chart_count = 12;
-    yy_chart *charts[12], *chart, *table;
+    static const u32 chart_count = 8;
+    yy_chart *charts[8], *chart;
     u32 i, j, s, len;
     u64 tsc_begin, tsc_end, tsc;
     f64 tsc_avg, tsc_avg_min, tsc_avg_sum, cycles;
@@ -332,22 +332,8 @@ static void itoa_group_benchmark_all(const char *report_file_path) {
     
     printf("prepare...\n");
     yy_cpu_setup_priority();
-    yy_cpu_spin(0.5);
+    yy_cpu_spin(1.0);
     yy_cpu_measure_freq();
-    
-    // perf
-    yy_perf *perf = NULL;
-    if (yy_perf_load(true)) {
-        perf = yy_perf_new();
-        yy_perf_add_event(perf, YY_PERF_EVENT_BRANCHES);
-        yy_perf_add_event(perf, YY_PERF_EVENT_BRANCH_MISSES);
-        yy_perf_add_event(perf, YY_PERF_EVENT_L1D_LOADS);
-        yy_perf_add_event(perf, YY_PERF_EVENT_L1D_LOAD_MISSES);
-        if (!yy_perf_open(perf)) {
-            yy_perf_free(perf);
-            perf = NULL;
-        }
-    }
     
     // create report
     yy_report *report = yy_report_new();
@@ -361,22 +347,18 @@ static void itoa_group_benchmark_all(const char *report_file_path) {
         switch (i) {
             case 0: op.title = "itoa u32 (fixed length)"; break;
             case 1: op.title = "itoa u32 (random length)"; break;
-            case 2: op.title = "itoa u32 (random length) branches"; break;
                 
-            case 3: op.title = "itoa u64 (fixed length)"; break;
-            case 4: op.title = "itoa u64 (random length)"; break;
-            case 5: op.title = "itoa u64 (random length) branches"; break;
+            case 2: op.title = "itoa u64 (fixed length)"; break;
+            case 3: op.title = "itoa u64 (random length)"; break;
                 
-            case 6: op.title = "itoa i32 (fixed length)"; break;
-            case 7: op.title = "itoa i32 (random length)"; break;
-            case 8: op.title = "itoa i32 (random length) branches"; break;
+            case 4: op.title = "itoa i32 (fixed length)"; break;
+            case 5: op.title = "itoa i32 (random length)"; break;
                 
-            case 9: op.title = "itoa i64 (fixed length)"; break;
-            case 10: op.title = "itoa i64 (random length)"; break;
-            case 11: op.title = "itoa i64 (random length) branches"; break;
+            case 6: op.title = "itoa i64 (fixed length)"; break;
+            case 7: op.title = "itoa i64 (random length)"; break;
             default: break;
         }
-        if ((i % 3) == 0) { /* sequence (line chart) */
+        if ((i % 2) == 0) { /* sequence (line chart) */
             op.type = YY_CHART_LINE;
             op.v_axis.title = "CPU cycles";
             op.v_axis.logarithmic = true;
@@ -388,7 +370,7 @@ static void itoa_group_benchmark_all(const char *report_file_path) {
             op.tooltip.crosshairs = true;
             op.width = 800;
             op.height = 540;
-        } else if ((i % 3) == 1) { /* random (bar chart) */
+        } else if ((i % 2) == 1) { /* random (bar chart) */
             op.type = YY_CHART_BAR;
             op.h_axis.title = "average CPU cycles";
             op.plot.value_labels_enabled = true;
@@ -401,13 +383,6 @@ static void itoa_group_benchmark_all(const char *report_file_path) {
             op.tooltip.value_decimals = 2;
             op.width = 640;
             op.height = 420;
-        } else { /* table */
-            op.type = YY_CHART_TABLE;
-            static const char *categories[] = {"Branches", "Branch Misses",
-                                               "L1d Loads", "L1d Load Misses", NULL};
-            op.h_axis.categories = categories;
-            op.width = 800;
-            op.height = 0;
         }
         yy_chart_set_options(charts[i], &op);
     }
@@ -471,61 +446,38 @@ static void itoa_group_benchmark_all(const char *report_file_path) {
         group = itoa_group_array[i];                                            \
         func = group.type ## _func;                                             \
         chart = charts[chart_idx];                                              \
-        table = charts[chart_idx + 1];                                          \
         if (!func || !group.need_benchmark) continue;                           \
-        u64 branch_sum = 0, miss_sum = 0, l1d_sum = 0, l1d_miss_sum = 0;        \
                                                                                 \
         /* run benchmark */                                                     \
         tsc_avg_min = HUGE_VAL;                                                 \
         for (j = 0; j < repeat_count; j++) {                                    \
             out_cur = out_buf;                                                  \
-            if (perf) yy_perf_start_counting(perf);                             \
             tsc_begin = yy_time_get_ticks();                                    \
             for (s = 0; s < sample_count; s++) {                                \
                 out_cur = func(((type *)in_buf)[s], out_cur);                   \
             }                                                                   \
             tsc_end = yy_time_get_ticks();                                      \
-            if (perf) yy_perf_stop_counting(perf);                              \
             tsc = tsc_end - tsc_begin;                                          \
             tsc_avg = (double)tsc / sample_count;                               \
             if (tsc_avg < tsc_avg_min) tsc_avg_min = tsc_avg;                   \
-            if (perf) {                                                         \
-                u64 *vals = yy_perf_get_counters(perf);                         \
-                u64 branch = vals[0];                                           \
-                branch = branch > sample_count ? branch - sample_count : 0;     \
-                u64 miss = vals[1];                                             \
-                miss = miss > 1 ? miss - 1 : 0;                                 \
-                branch_sum += branch;                                           \
-                miss_sum += miss;                                               \
-                l1d_sum += vals[2];                                             \
-                l1d_miss_sum += vals[3];                                        \
-            }                                                                   \
         }                                                                       \
         cycles = tsc_avg_min * yy_cpu_get_cycle_per_tick();                     \
         yy_chart_item_with_float(chart, group.name, (float)cycles);             \
-        yy_chart_item_begin(table, group.name);                                 \
-        yy_chart_item_add_float(table, (f32)((f64)branch_sum / repeat_count / sample_count) - 2); \
-        yy_chart_item_add_float(table, (f32)((f64)miss_sum / repeat_count / sample_count));\
-        yy_chart_item_add_float(table, (f32)((f64)l1d_sum / repeat_count / sample_count) - 2); \
-        yy_chart_item_add_float(table, (f32)((f64)l1d_miss_sum / repeat_count / sample_count)); \
-        yy_chart_item_end(table);                                               \
     }
     
     
     
     BENCHMARK_SEQUENTIAL(u32, 10, 0)
     BENCHMARK_RANDOM(u32, 1)
-    BENCHMARK_SEQUENTIAL(u64, 20, 3)
-    BENCHMARK_RANDOM(u64, 4)
-    BENCHMARK_SEQUENTIAL(i32, 10, 6)
-    BENCHMARK_RANDOM(i32, 7)
-    BENCHMARK_SEQUENTIAL(i64, 19, 9)
-    BENCHMARK_RANDOM(i64, 10)
+    BENCHMARK_SEQUENTIAL(u64, 20, 2)
+    BENCHMARK_RANDOM(u64, 3)
+    BENCHMARK_SEQUENTIAL(i32, 10, 4)
+    BENCHMARK_RANDOM(i32, 5)
+    BENCHMARK_SEQUENTIAL(i64, 19, 6)
+    BENCHMARK_RANDOM(i64, 7)
     
     for (i = 0; i < chart_count; i++) {
-        if ((i % 3) != 2) {
-            yy_chart_sort_items_with_value(charts[i], false);
-        }
+        yy_chart_sort_items_with_value(charts[i], false);
     }
     for (i = 0; i < chart_count; i++) {
         yy_report_add_chart(report, charts[i]);

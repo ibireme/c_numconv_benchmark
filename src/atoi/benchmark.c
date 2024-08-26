@@ -373,7 +373,7 @@ static void atoi_group_benchmark_all(const char *output_path) {
     
     printf("prepare...\n");
     yy_cpu_setup_priority();
-    yy_cpu_spin(0.5);
+    yy_cpu_spin(1.0);
     yy_cpu_measure_freq();
     
     char *buf = malloc(sample_count * u64_max_buf_len);

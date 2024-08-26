@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'>
+<title>Report</title>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/highcharts/8.2.0/highcharts.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/highcharts/8.2.0/modules/series-label.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/highcharts/8.2.0/modules/exporting.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/highcharts/8.2.0/modules/export-data.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/highcharts/8.2.0/modules/offline-exporting.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/sortable/0.8.0/js/sortable.min.js'></script>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.0/css/bulma.min.css' />
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/sortable/0.8.0/css/sortable-theme-bootstrap.min.css' />
+<script>window.onload=Sortable.init</script>
+<style type='text/css'>
+hr {
+    height: 1px;
+    margin: 5px 0; 
+    background-color: #999999; 
+}
+.table thead {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+.highcharts-data-table table, th, td { 
+    border: 1px solid gray;
+    padding: 2pt;
+}
+.highcharts-data-table table {
+    margin: auto;
+}
+table .number { 
+    align-items: initial;
+    border-radius: initial;
+    display: table-cell;
+    font-size: initial;
+    height: initial;
+    justify-content: initial;
+    margin-right: initial;
+    min-width: initial;
+    padding: 2pt;
+    vertical-align: initial;
+    text-align: initial;
+    background-color: initial;
+}
+.table.is-narrow td, .table.is-narrow th {
+    padding: .1em .5em;
+}
+</style>
+</head>
+
+<body>
+<nav class='navbar is-light is-fixed-top' role='navigation' aria-label='main navigation'>
+    <div class='navbar-brand'>
+        <a class='navbar-item' href='#'>Report</a>
+        <a role='button' class='navbar-burger burger' aria-label='menu' data-target='main-menu'
+            onclick='document.querySelector(".navbar-menu").classList.toggle("is-active");'>
+            <span aria-hidden='true'></span>
+            <span aria-hidden='true'></span>
+            <span aria-hidden='true'></span>
+        </a>
+    </div>
+    <div id='main-menu' class='navbar-menu'>
+        <div class='navbar-start'>
+            <div class='navbar-item has-dropdown is-hoverable'>
+                <a class='navbar-link'>Info</a>
+                <div class='navbar-dropdown'>
+                    <a class='navbar-item'>Compiler: GCC 13.2.0</a>
+                    <a class='navbar-item'>OS: Linux 64-bit</a>
+                    <a class='navbar-item'>CPU: 13th Gen Intel(R) Core(TM) i5-13600KF</a>
+                    <a class='navbar-item'>CPU Frequency: 5089.24 MHz</a>
+                </div>
+            </div>
+            <div class='navbar-item has-dropdown is-hoverable'>
+                <a class='navbar-link'>Charts</a>
+                <div class='navbar-dropdown'>
+                    <a class='navbar-item' href='#chart_0'>atoi u32 (fixed length)</a>
+                    <a class='navbar-item' href='#chart_1'>atoi u32 (random length)</a>
+                    <a class='navbar-item' href='#chart_2'>atoi u64 (fixed length)</a>
+                    <a class='navbar-item' href='#chart_3'>atoi u64 (random length)</a>
+                    <a class='navbar-item' href='#chart_4'>atoi i32 (fixed length)</a>
+                    <a class='navbar-item' href='#chart_5'>atoi i32 (random length)</a>
+                    <a class='navbar-item' href='#chart_6'>atoi i64 (fixed length)</a>
+                    <a class='navbar-item' href='#chart_7'>atoi i64 (random length)</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a name='chart_0'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_0' style='width: 640px; height: 400px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_0', {
+    chart: { type: 'line' },
+    title: { text: 'atoi u32 (fixed length)' },
+    credits: { enabled: false },
+    xAxis: { title: { text: 'digit count' }, tickInterval: 1.000000, allowDecimals: true, type: 'linear' },
+    yAxis: { title: { text: 'CPU cycles' }, allowDecimals: true, type: 'logarithmic' },
+    tooltip: {valueDecimals: 2, shared: true, crosshairs: true, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: true },
+    plotOptions: {
+        line: { pointStart: 1.000000, pointInterval: 1.000000 },
+        series: { label: { enabled: false}, dataLabels: { enabled: false , allowOverlap: true} }
+    },
+    series: [
+        { name: 'libc', data: [22.994728, 28.500349, 33.094315, 33.002258, 37.997795, 38.996845, 41.994865, 45.001186, 48.006199, 54.994736] },
+        { name: 'libcpp', data: [13.154993, 17.653408, 22.922338, 25.053274, 20.207472, 22.195955, 27.220623, 28.202339, 30.483589, 35.484951] },
+        { name: 'lemire', data: [7.493522, 8.000257, 9.998791, 11.015173, 14.005474, 13.003948, 14.009261, 9.993984, 10.995509, 11.997472] },
+        { name: 'yy', data: [5.009373, 5.996332, 6.019637, 6.997566, 7.997780, 8.998431, 9.501816, 10.344431, 11.887211, 14.098839] },
+        { name: 'null', data: [3.996196, 3.997798, 3.996632, 4.010470, 3.995030, 3.999837, 3.995467, 4.009013, 3.997798, 3.994593] }
+    ]
+});
+</script>
+
+<a name='chart_1'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_1' style='width: 640px; height: 300px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_1', {
+    chart: { type: 'bar' },
+    title: { text: 'atoi u32 (random length)' },
+    credits: { enabled: false },
+    xAxis: { allowDecimals: true, categories: ['libc', 'libcpp', 'lemire', 'yy', 'null'], type: 'linear' },
+    yAxis: { title: { text: 'average CPU cycles' }, allowDecimals: true, type: 'linear' },
+    tooltip: {valueDecimals: 2, shared: false, crosshairs: false, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: false },
+    plotOptions: {
+        bar: { groupPadding: 0.000000, pointPadding: 0.100000, borderWidth: 0.000000, colorByPoint: true },
+        series: { label: { enabled: false}, dataLabels: { enabled: true , allowOverlap: true, format: '{point.y:.2f}' } }
+    },
+    series: [
+        { data: [70.382912, 55.351589, 37.496742, 27.026756, 3.993428] }
+    ]
+});
+</script>
+
+<a name='chart_2'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_2' style='width: 640px; height: 400px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_2', {
+    chart: { type: 'line' },
+    title: { text: 'atoi u64 (fixed length)' },
+    credits: { enabled: false },
+    xAxis: { title: { text: 'digit count' }, tickInterval: 1.000000, allowDecimals: true, type: 'linear' },
+    yAxis: { title: { text: 'CPU cycles' }, allowDecimals: true, type: 'logarithmic' },
+    tooltip: {valueDecimals: 2, shared: true, crosshairs: true, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: true },
+    plotOptions: {
+        line: { pointStart: 1.000000, pointInterval: 1.000000 },
+        series: { label: { enabled: false}, dataLabels: { enabled: false , allowOverlap: true} }
+    },
+    series: [
+        { name: 'libc', data: [24.641506, 30.502815, 32.009911, 39.993271, 44.004761, 39.998951, 43.003819, 46.003876, 57.999599, 57.998726, 59.996387, 62.009632, 65.011879, 76.017288, 71.031517, 74.995667, 98.738770, 119.642914, 99.053825, 87.165886] },
+        { name: 'libcpp', data: [13.210779, 17.720118, 18.749754, 22.258442, 24.221437, 25.231846, 27.808487, 31.460936, 32.232327, 33.254387, 36.300037, 38.284298, 41.293243, 47.590790, 43.354702, 46.350826, 51.328300, 53.301201, 61.324764, 62.352070] },
+        { name: 'yy', data: [6.989992, 6.713975, 6.999605, 8.001130, 9.001053, 10.002578, 11.008764, 12.148079, 13.790924, 15.424884, 17.046316, 19.216579, 21.316343, 23.132811, 25.137316, 27.076132, 29.154196, 31.926304, 34.437691, 37.774796] },
+        { name: 'lemire', data: [7.666415, 11.493505, 12.494301, 15.999493, 17.995989, 19.994232, 21.023140, 10.840532, 12.171675, 13.344490, 14.520947, 15.690849, 16.966789, 19.995543, 22.992836, 13.015164, 14.023389, 15.275295, 16.700241, 18.916092] },
+        { name: 'null', data: [4.991166, 4.992477, 4.992186, 4.992622, 4.992477, 4.992331, 4.992331, 4.992622, 4.011489, 4.991749, 4.992331, 4.992768, 4.992622, 4.992768, 4.992331, 4.992186, 4.991749, 4.991312, 4.992331, 4.829052] }
+    ]
+});
+</script>
+
+<a name='chart_3'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_3' style='width: 640px; height: 300px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_3', {
+    chart: { type: 'bar' },
+    title: { text: 'atoi u64 (random length)' },
+    credits: { enabled: false },
+    xAxis: { allowDecimals: true, categories: ['libc', 'libcpp', 'lemire', 'yy', 'null'], type: 'linear' },
+    yAxis: { title: { text: 'average CPU cycles' }, allowDecimals: true, type: 'linear' },
+    tooltip: {valueDecimals: 2, shared: false, crosshairs: false, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: false },
+    plotOptions: {
+        bar: { groupPadding: 0.000000, pointPadding: 0.100000, borderWidth: 0.000000, colorByPoint: true },
+        series: { label: { enabled: false}, dataLabels: { enabled: true , allowOverlap: true, format: '{point.y:.2f}' } }
+    },
+    series: [
+        { data: [118.634689, 64.715034, 34.502071, 30.406393, 3.993282] }
+    ]
+});
+</script>
+
+<a name='chart_4'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_4' style='width: 640px; height: 400px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_4', {
+    chart: { type: 'line' },
+    title: { text: 'atoi i32 (fixed length)' },
+    credits: { enabled: false },
+    xAxis: { title: { text: 'digit count' }, tickInterval: 1.000000, allowDecimals: true, type: 'linear' },
+    yAxis: { title: { text: 'CPU cycles' }, allowDecimals: true, type: 'logarithmic' },
+    tooltip: {valueDecimals: 2, shared: true, crosshairs: true, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: true },
+    plotOptions: {
+        line: { pointStart: 1.000000, pointInterval: 1.000000 },
+        series: { label: { enabled: false}, dataLabels: { enabled: false , allowOverlap: true} }
+    },
+    series: [
+        { name: 'libc', data: [24.286253, 29.082386, 31.530123, 35.845158, 36.345921, 38.504383, 41.520466, 45.023762, 47.016327, 48.514534] },
+        { name: 'libcpp', data: [14.978305, 18.137129, 21.288378, 24.685930, 20.931086, 22.689581, 24.692194, 27.742504, 35.788059, 35.851273] },
+        { name: 'lemire', data: [8.969883, 11.505302, 13.186892, 13.542727, 14.615768, 17.259556, 14.729526, 11.080572, 12.812412, 14.302901] },
+        { name: 'yy', data: [6.439707, 7.500076, 8.284430, 9.062374, 10.110071, 11.349743, 12.838630, 14.570907, 16.961254, 18.846033] },
+        { name: 'null', data: [3.994302, 3.994156, 3.993428, 3.994011, 3.993719, 3.994448, 3.994593, 3.993574, 3.993719, 3.993574] }
+    ]
+});
+</script>
+
+<a name='chart_5'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_5' style='width: 640px; height: 300px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_5', {
+    chart: { type: 'bar' },
+    title: { text: 'atoi i32 (random length)' },
+    credits: { enabled: false },
+    xAxis: { allowDecimals: true, categories: ['libc', 'libcpp', 'lemire', 'yy', 'null'], type: 'linear' },
+    yAxis: { title: { text: 'average CPU cycles' }, allowDecimals: true, type: 'linear' },
+    tooltip: {valueDecimals: 2, shared: false, crosshairs: false, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: false },
+    plotOptions: {
+        bar: { groupPadding: 0.000000, pointPadding: 0.100000, borderWidth: 0.000000, colorByPoint: true },
+        series: { label: { enabled: false}, dataLabels: { enabled: true , allowOverlap: true, format: '{point.y:.2f}' } }
+    },
+    series: [
+        { data: [84.663963, 60.422138, 36.907711, 27.078026, 3.993719] }
+    ]
+});
+</script>
+
+<a name='chart_6'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_6' style='width: 640px; height: 400px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_6', {
+    chart: { type: 'line' },
+    title: { text: 'atoi i64 (fixed length)' },
+    credits: { enabled: false },
+    xAxis: { title: { text: 'digit count' }, tickInterval: 1.000000, allowDecimals: true, type: 'linear' },
+    yAxis: { title: { text: 'CPU cycles' }, allowDecimals: true, type: 'logarithmic' },
+    tooltip: {valueDecimals: 2, shared: true, crosshairs: true, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: true },
+    plotOptions: {
+        line: { pointStart: 1.000000, pointInterval: 1.000000 },
+        series: { label: { enabled: false}, dataLabels: { enabled: false , allowOverlap: true} }
+    },
+    series: [
+        { name: 'libc', data: [25.370510, 29.113995, 31.396120, 35.608322, 36.529446, 39.006310, 43.015034, 45.785393, 48.513371, 52.115131, 54.611660, 57.020508, 60.513317, 63.011887, 65.542648, 70.797882, 72.028816, 75.508522, 80.170212] },
+        { name: 'libcpp', data: [15.071670, 18.738684, 21.736706, 21.773701, 21.776760, 23.260258, 25.254860, 27.236645, 29.251202, 31.277119, 32.825726, 35.805828, 38.492878, 39.314079, 42.306713, 44.318501, 46.805126, 49.799507, 51.481968] },
+        { name: 'yy', data: [6.646100, 8.165721, 10.488921, 10.824073, 12.272032, 13.544475, 15.369389, 17.329033, 19.331064, 21.401260, 23.374743, 25.139355, 26.866535, 28.799961, 30.679205, 33.234577, 35.690907, 38.581291, 40.690231] },
+        { name: 'lemire', data: [9.851097, 11.253757, 12.985742, 14.649561, 17.010340, 17.103704, 15.304718, 13.269915, 15.094101, 17.218481, 19.160357, 20.833206, 22.504890, 24.391708, 20.669199, 16.684801, 18.238068, 20.399736, 22.080742] },
+        { name: 'null', data: [3.993865, 3.993137, 3.993719, 4.004352, 3.994156, 3.993428, 3.993719, 3.994448, 3.996050, 3.994302, 3.994011, 3.993137, 3.993719, 5.324425, 3.993428, 3.994011, 3.996632, 3.993865, 3.993428] }
+    ]
+});
+</script>
+
+<a name='chart_7'></a>
+<div style='width: 60px; height: 60px; margin: 0 auto'></div>
+<div id='chart_id_7' style='width: 640px; height: 300px; margin: 0 auto'></div>
+<script type='text/javascript'>
+Highcharts.chart('chart_id_7', {
+    chart: { type: 'bar' },
+    title: { text: 'atoi i64 (random length)' },
+    credits: { enabled: false },
+    xAxis: { allowDecimals: true, categories: ['libc', 'libcpp', 'lemire', 'yy', 'null'], type: 'linear' },
+    yAxis: { title: { text: 'average CPU cycles' }, allowDecimals: true, type: 'linear' },
+    tooltip: {valueDecimals: 2, shared: false, crosshairs: false, shadow: false },
+    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', enabled: false },
+    plotOptions: {
+        bar: { groupPadding: 0.000000, pointPadding: 0.100000, borderWidth: 0.000000, colorByPoint: true },
+        series: { label: { enabled: false}, dataLabels: { enabled: true , allowOverlap: true, format: '{point.y:.2f}' } }
+    },
+    series: [
+        { data: [104.120728, 70.694763, 51.186871, 36.126564, 3.994739] }
+    ]
+});
+</script>
+
+</body>
+</html>
