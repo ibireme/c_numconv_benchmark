@@ -100,12 +100,6 @@
 #   endif
 #endif
 
-
-
-/*==============================================================================
- * Flags
- *============================================================================*/
-
 /* compiler version (GCC) */
 #ifndef yy_gcc_available
 #   define yy_gcc_available(major, minor, patch) \
@@ -115,10 +109,31 @@
 
 /* real gcc check */
 #ifndef yy_is_real_gcc
-#   if !defined(__clang__) && !defined(__INTEL_COMPILER) && !defined(__ICC) && \
-        defined(__GNUC__) && defined(__GNUC_MINOR__)
+#   if defined(__GNUC__) && defined(__GNUC_MINOR__) && \
+        !defined(__clang__) && !defined(__llvm__) && \
+        !defined(__INTEL_COMPILER) && !defined(__ICC)
 #       define yy_is_real_gcc 1
 #   endif
+#endif
+
+/*
+ Compiler barriers for single variable.
+ 
+ These macros informs GCC that a read/write access to the given memory location
+ will occur, preventing certain compiler optimizations or reordering around
+ the access to 'val'. It does not emit any actual instructions.
+ 
+ Useful when GCC's default optimization strategies are suboptimal and need
+ precise control over memory access patterns.
+ */
+#if defined(yy_is_real_gcc)
+#   define gcc_load_barrier(val)   __asm__ volatile(""::"m"(val))
+#   define gcc_store_barrier(val)  __asm__ volatile("":"=m"(val))
+#   define gcc_full_barrier(val)   __asm__ volatile("":"=m"(val):"m"(val))
+#else
+#   define gcc_load_barrier(val)
+#   define gcc_store_barrier(val)
+#   define gcc_full_barrier(val)
 #endif
 
 /* msvc intrinsic */
@@ -1229,8 +1244,9 @@ static const u64 pow10_sig_table[] = {
  */
 static_inline void pow10_table_get_sig(i32 exp10, u64 *hi, u64 *lo) {
     i32 idx = exp10 - (POW10_SIG_TABLE_MIN_EXP);
-    *hi = pow10_sig_table[idx * 2];
-    *lo = pow10_sig_table[idx * 2 + 1];
+    const u64 *sig = pow10_sig_table + idx * 2;
+    *hi = sig[0];
+    *lo = sig[1];
 }
 
 /**
@@ -2283,7 +2299,7 @@ static_inline u8 *write_u32_len_1_to_8(u32 val, u8 *buf) {
 
 /** Trailing zero count table for number 0 to 99.
     (generate with misc/make_tables.c) */
-static const u8 dec_trailing_zero_table[] = {
+static const u8 dec_tz_table[] = {
     2, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -2375,14 +2391,16 @@ static_inline u8 *write_u64_len_16_to_17_trim(u64 val, u8 *buf) {
             u32 ii = hhii - hh * 100;               /* (ccdd % 100) */
             byte_copy_2(buf + 12, digit_table + hh * 2);
             byte_copy_2(buf + 14, digit_table + ii * 2);
-            tz1 = dec_trailing_zero_table[hh];
-            tz2 = dec_trailing_zero_table[ii];
-            tz = ii ? tz2 : (tz1 + 2);
+            tz1 = dec_tz_table[hh];
+            tz2 = dec_tz_table[ii];
+            gcc_load_barrier(tz2); /* let gcc emit cmov */
+            tz = tz2 + (ii ? 0 : tz1);
             return buf + 16 - tz;
         } else {
-            tz1 = dec_trailing_zero_table[ff];
-            tz2 = dec_trailing_zero_table[gg];
-            tz = gg ? tz2 : (tz1 + 2);
+            tz1 = dec_tz_table[ff];
+            tz2 = dec_tz_table[gg];
+            gcc_load_barrier(tz2); /* let gcc emit cmov */
+            tz = tz2 + (gg ? 0 : tz1);
             return buf + 12 - tz;
         }
     } else {
@@ -2391,164 +2409,158 @@ static_inline u8 *write_u64_len_16_to_17_trim(u64 val, u8 *buf) {
             u32 ee = ddee - dd * 100;               /* (ddee % 100) */
             byte_copy_2(buf + 4, digit_table + dd * 2);
             byte_copy_2(buf + 6, digit_table + ee * 2);
-            tz1 = dec_trailing_zero_table[dd];
-            tz2 = dec_trailing_zero_table[ee];
-            tz = ee ? tz2 : (tz1 + 2);
+            tz1 = dec_tz_table[dd];
+            tz2 = dec_tz_table[ee];
+            gcc_load_barrier(tz2); /* let gcc emit cmov */
+            tz = tz2 + (ee ? 0 : tz1);
             return buf + 8 - tz;
         } else {
-            tz1 = dec_trailing_zero_table[bb];
-            tz2 = dec_trailing_zero_table[cc];
-            tz = cc ? tz2 : (tz1 + tz2);
+            tz1 = dec_tz_table[bb];
+            tz2 = dec_tz_table[cc];
+            gcc_load_barrier(tz2); /* let gcc emit cmov */
+            tz = tz2 + (cc ? 0 : tz1);
             return buf + 4 - tz;
         }
     }
 }
 
-/** Write exponent part in range `e-324` to `e308`. */
+/** Write exponent part in the range `e-324` to `e308`. */
 static_inline u8 *write_f64_exp(i32 exp, u8 *buf) {
+    u32 neg, lz, a, bb;
+    
+    /* write the exponent notation and sign */
+    neg = exp < 0;
+    exp = neg ? -exp : exp;
     byte_copy_2(buf, "e-");
-    buf += 2 - (exp >= 0);
-    exp = exp < 0 ? -exp : exp;
-    if (exp < 100) {
-        bool lz = exp < 10;
-        byte_copy_2(buf + 0, digit_table + (u32)exp * 2 + lz);
-        return buf + 2 - lz;
-    } else {
-        u32 hi = ((u32)exp * 656) >> 16;    /* exp / 100 */
-        u32 lo = (u32)exp - hi * 100;       /* exp % 100 */
-        buf[0] = (u8)((u8)hi + (u8)'0');
-        byte_copy_2(buf + 1, digit_table + lo * 2);
-        return buf + 3;
-    }
-}
-
-/** Multiplies 128-bit integer and returns highest 64-bit rounded value. */
-static_inline u64 u128_round_to_odd(u64 hi, u64 lo, u64 cp) {
-    u64 x_hi, x_lo, y_hi, y_lo;
-    u128_mul(cp, lo, &x_hi, &x_lo);
-    u128_mul_add(cp, hi, x_hi, &y_hi, &y_lo);
-    return y_hi | (y_lo > 1);
+    buf += 1 + neg;
+    
+    /* write the exponent value */
+    a = ((u32)exp * 656) >> 16; /* exp / 100 */
+    bb = (u32)exp - a * 100;    /* exp % 100 */
+    buf[0] = (u8)((u8)a + (u8)'0');
+    buf += a > 0;
+    lz = exp < 10;
+    byte_copy_2(buf, digit_table + bb * 2 + lz);
+    return buf + 2 - lz;
 }
 
 /**
  Convert double number from binary to decimal.
  The output significand is shortest decimal but may have trailing zeros.
  
- @param sig_raw The raw value of significand in IEEE 754 format.
- @param exp_raw The raw value of exponent in IEEE 754 format.
- @param sig_bin The decoded value of significand in binary.
- @param exp_bin The decoded value of exponent in binary.
- @param sig_dec The output value of significand in decimal.
- @param exp_dec The output value of exponent in decimal.
+ @param sig_bin The input significand in binary format.
+ @param exp_bin The input exponent in binary format.
+ @param sig_dec The output significand in decimal format.
+ @param exp_dec The output exponent in decimal format.
  @warning The input double number should not be 0, inf or nan.
  */
-static_inline void f64_bin_to_dec(u64 sig_raw, u32 exp_raw,
-                                  u64 sig_bin, i32 exp_bin,
+static_inline void f64_bin_to_dec(u64 sig_bin, i32 exp_bin,
                                   u64 *sig_dec, i32 *exp_dec) {
-    
-    bool is_even, irregular, round_up, trim;
-    bool u0_inside, u1_inside, w0_inside, w1_inside;
-    u64 s, sp, cb, cbl, cbr, vb, vbl, vbr, p10_hi, p10_lo, upper, lower, mid;
-    i32 k, h;
-    
     /*
-     Fast path:
-     For regular spacing significand 'c', there are 4 candidates:
+     For regular spacing significand 'c', there are 4 candidates for the result:
      
-             u0             u1 c  w1                            w0
+             d0             d1 c  u1                            u0
      ----|----|----|----|----|-*--|----|----|----|----|----|----|----|----
          9    0    1    2    3    4    5    6    7    8    9    0    1
            |___________________|___________________|
                              1ulp
      
      The `1ulp` is in the range [1.0, 10.0).
-     If (c - 0.5ulp < u0), trim the last digit and round down.
-     If (c + 0.5ulp > w0), trim the last digit and round up.
-     If (c - 0.5ulp < u1), round down.
-     If (c + 0.5ulp > w1), round up.
+     If (c < x.5), round down to nearest 1.
+     If (c > x.5), round up to nearest 1.
+     If (c - 0.5ulp < u0), trim the last digit and round down to nearest 10.
+     If (c + 0.5ulp > w0), trim the last digit and round up to nearest 10.
      */
-    while (likely(sig_raw)) {
-        u64 mod, dec, add_1, add_10, s_hi, s_lo;
-        u64 c, half_ulp, t0, t1;
-        
-        /* k = floor(exp_bin * log10(2)); */
-        /* h = exp_bin + floor(log2(10) * -k); (h = 0/1/2/3) */
-        k = (i32)(exp_bin * 315653) >> 20;
-        h = exp_bin + ((-k * 217707) >> 16);
+    bool irregular, round_d0, round_d1, round_u0, round_u1;
+    u64 cb, p10_hi, p10_lo, sig_hi, sig_lo;
+    u64 one, ten, c, half_ulp, t0, t1, dec, dec_one, dec_ten;
+    i32 k, h, trim, add_ten;
+    
+    /* fast path */
+    while (likely((sig_bin != 0x10000000000000ull))) {
+        k = (i32)(exp_bin * 315653) >> 20; /* floor(exp_bin * log10(2)) */
+        h = exp_bin + ((-k * 217707) >> 16); /* exp_bin - k * floor(log2(10)) */
         pow10_table_get_sig(-k, &p10_hi, &p10_lo);
         
-        /* sig_bin << (1/2/3/4) */
-        cb = sig_bin << (h + 1);
-        u128_mul(cb, p10_lo, &s_hi, &s_lo);
-        u128_mul_add(cb, p10_hi, s_hi, &s_hi, &s_lo);
-        mod = s_hi % 10;
-        dec = s_hi - mod;
+        cb = sig_bin << (h + 1); /* h = 0/1/2/3 */
+        u128_mul(cb, p10_lo, &sig_hi, &sig_lo);
+        u128_mul_add(cb, p10_hi, sig_hi, &sig_hi, &sig_lo);
+        one = sig_hi % 10;
+        ten = sig_hi - one;
         
         /* right shift 4 to fit in u64 */
-        c = (mod << (64 - 4)) | (s_lo >> 4);
+        c = (one << (64 - 4)) | (sig_lo >> 4);
         half_ulp = p10_hi >> (4 - h);
-        
-        /* check w1, u0, w0 range */
-        w1_inside = (s_lo >= ((u64)1 << 63));
-        if (unlikely(s_lo == ((u64)1 << 63))) break;
-        u0_inside = (half_ulp >= c);
-        if (unlikely(half_ulp == c)) break;
         t0 = ((u64)10 << (64 - 4));
         t1 = c + half_ulp;
-        w0_inside = (t1 >= t0);
-        if (unlikely(t0 - t1 <= (u64)1)) break;
         
-        trim = (u0_inside | w0_inside);
-        add_10 = (w0_inside ? 10 : 0);
-        add_1 = mod + w1_inside;
-        *sig_dec = dec + (trim ? add_10 : add_1);
+        /* check range */
+        if (unlikely(sig_lo == ((u64)1 << 63))) break;
+        if (unlikely(half_ulp == c)) break;
+        if (unlikely(t0 - t1 <= (u64)1)) break;
+        round_u1 = (sig_lo >= ((u64)1 << 63));
+        round_u0 = (t1 >> 60) >= 10;
+        round_d0 = (half_ulp >= c);
+        
+        /* round result */
+        trim = (round_d0 + round_u0);
+        add_ten = (round_u0 ? 10 : 0);
+        dec_one = sig_hi +  round_u1;
+        dec_ten = ten + add_ten;
+        dec = trim ? dec_ten : dec_one;
+        gcc_load_barrier(dec_one); /* let gcc emit cmov */
+        *sig_dec = dec;
         *exp_dec = k;
         return;
     }
     
-    /*
-     Schubfach algorithm:
-     Raffaello Giulietti, The Schubfach way to render doubles, 2022.
-     https://drive.google.com/file/d/1gp5xv4CAa78SVgCeWfGqqI4FfYYYuNFb (Paper)
-     https://github.com/openjdk/jdk/pull/3402 (Java implementation)
-     https://github.com/abolz/Drachennest (C++ implementation)
-     */
-    irregular = (sig_raw == 0 && exp_raw > 1);
-    is_even = !(sig_bin & 1);
-    cbl = 4 * sig_bin - 2 + irregular;
-    cb  = 4 * sig_bin;
-    cbr = 4 * sig_bin + 2;
-    
-    /* k = floor(exp_bin * log10(2) + (irregular ? log10(3.0 / 4.0) : 0)); */
-    /* h = exp_bin + floor(log2(10) * -k) + 1; (h = 1/2/3/4) */
-    k = (i32)(exp_bin * 315653 - (irregular ? 131237 : 0)) >> 20;
-    h = exp_bin + ((-k * 217707) >> 16) + 1;
-    pow10_table_get_sig(-k, &p10_hi, &p10_lo);
-    p10_lo += 1;
-    
-    vbl = u128_round_to_odd(p10_hi, p10_lo, cbl << h);
-    vb  = u128_round_to_odd(p10_hi, p10_lo, cb  << h);
-    vbr = u128_round_to_odd(p10_hi, p10_lo, cbr << h);
-    lower = vbl + !is_even;
-    upper = vbr - !is_even;
-    
-    s = vb / 4;
-    if (s >= 10) {
-        sp = s / 10;
-        u0_inside = (lower <= 40 * sp);
-        w0_inside = (upper >= 40 * sp + 40);
-        if (u0_inside != w0_inside) {
-            *sig_dec = sp * 10 + (w0_inside ? 10 : 0);
-            *exp_dec = k;
-            return;
+    /* full path */
+    {
+        /* k = floor(exp_bin * log10(2) + (irregular ? log10(3.0 / 4.0) : 0)) */
+        irregular = (sig_bin == 0x10000000000000ull);
+        k = (i32)(exp_bin * 315653 - (irregular ? 131237 : 0)) >> 20;
+        h = exp_bin + ((-k * 217707) >> 16);
+        pow10_table_get_sig(-k, &p10_hi, &p10_lo);
+        
+        cb = sig_bin << (h + 1);
+        u128_mul(cb, p10_lo, &sig_hi, &sig_lo);
+        u128_mul_add(cb, p10_hi, sig_hi, &sig_hi, &sig_lo);
+        one = sig_hi % 10;
+        ten = sig_hi - one;
+        
+        /* right shift 4 to fit in u64 */
+        c = (one << (64 - 4)) | (sig_lo >> 4);
+        half_ulp = p10_hi >> (4 - h);
+        t0 = ((u64)10 << (64 - 4));
+        t1 = c + half_ulp;
+        
+        /* check range */
+        if (!irregular) {
+            round_u1 = (sig_lo >= ((u64)1 << 63));
+            if (sig_lo == ((u64)1 << 63)) round_u1 = (sig_hi & 1);
+            round_d0 = (half_ulp >= c);
+            if (half_ulp == c) round_d0 = !(sig_bin & 1);
+        } else {
+            round_u1 = (sig_lo > ((u64)1 << 63));
+            round_d1 = (half_ulp / 2 >= (sig_lo >> 4));
+            if (!round_d1) round_u1 = true;
+            round_d0 = (half_ulp / 2 >= c);
         }
+        round_u0 = (t1 >> 60) >= 10;
+        if (t0 - t1 <= (u64)1) {
+            if (k == 0 || (t0 - t1 == 1)) round_u0 = !(sig_bin & 1);
+        }
+        
+        /* round result */
+        trim = (round_d0 + round_u0);
+        add_ten = (round_u0 ? 10 : 0);
+        dec_one = sig_hi +  round_u1;
+        dec_ten = ten + add_ten;
+        dec = trim ? dec_ten : dec_one;
+        gcc_load_barrier(dec_one); /* let gcc emit cmov */
+        *sig_dec = dec;
+        *exp_dec = k;
     }
-    u1_inside = (lower <= 4 * s);
-    w1_inside = (upper >= 4 * s + 4);
-    mid = 4 * s + 2;
-    round_up = (vb > mid) || (vb == mid && (s & 1) != 0);
-    *sig_dec = s + ((u1_inside != w1_inside) ? w1_inside : round_up);
-    *exp_dec = k;
 }
 
 /**
@@ -2562,13 +2574,10 @@ static_inline void f64_bin_to_dec(u64 sig_raw, u32 exp_raw,
 */
 static_inline u8 *write_f64_raw(u8 *buf, u64 raw) {
     u64 sig_bin, sig_dec, sig_raw;
-    i32 exp_bin, exp_dec, sig_len, dot_ofs;
-    u32 exp_raw;
+    i32 exp_bin, exp_dec, exp_raw, sig_len, dot_ofs;
     u8 *end;
-    bool sign;
     
     /* decode raw bytes from IEEE-754 double format. */
-    sign = (bool)(raw >> (F64_BITS - 1));
     sig_raw = raw & F64_SIG_MASK;
     exp_raw = (u32)((raw & F64_EXP_MASK) >> F64_SIG_BITS);
     
@@ -2576,7 +2585,7 @@ static_inline u8 *write_f64_raw(u8 *buf, u64 raw) {
     if (unlikely(exp_raw == ((u32)1 << F64_EXP_BITS) - 1)) {
         if (sig_raw == 0) {
             buf[0] = '-';
-            buf += sign;
+            buf += (raw >> (F64_BITS - 1));
             byte_copy_8(buf, "Infinity");
             return buf + 8;
         } else {
@@ -2587,7 +2596,7 @@ static_inline u8 *write_f64_raw(u8 *buf, u64 raw) {
     
     /* add sign for all finite number */
     buf[0] = '-';
-    buf += sign;
+    buf += (raw >> (F64_BITS - 1));;
     
     /* return zero */
     if (unlikely((raw << 1) == 0)) {
@@ -2610,31 +2619,33 @@ static_inline u8 *write_f64_raw(u8 *buf, u64 raw) {
         }
         
         /* binary to decimal */
-        f64_bin_to_dec(sig_raw, exp_raw, sig_bin, exp_bin, &sig_dec, &exp_dec);
+        f64_bin_to_dec(sig_bin, exp_bin, &sig_dec, &exp_dec);
         
-        /* the sig length is 16 or 17 */
+        /* the significand length is 16 or 17 */
         sig_len = 16 + (sig_dec >= (u64)100000000 * 100000000);
         
         /* the decimal point offset relative to the first digit */
         dot_ofs = sig_len + exp_dec;
         
         if (likely(-6 < dot_ofs && dot_ofs <= 21)) {
-            i32 num_sep_pos, dot_set_pos, pre_ofs;
+            /* write without scientific notation, e.g. 0.001234, 123400.0 */
+            i32 no_pre_zero, pre_ofs, num_sep_pos, dot_set_pos;
             u8 *num_hdr, *num_end, *num_sep, *dot_end;
-            bool no_pre_zero;
             
             /* fill zeros */
             memset(buf, '0', 32);
             
-            /* not prefixed with zero, e.g. 1.234, 1234.0 */
+            /* calculate the offset before the number */
             no_pre_zero = (dot_ofs > 0);
+            pre_ofs = no_pre_zero ? 0 : (2 - dot_ofs);
+            gcc_full_barrier(no_pre_zero); /* let gcc emit cmov */
+            gcc_full_barrier(pre_ofs);
             
             /* write the number as digits */
-            pre_ofs = no_pre_zero ? 0 : (2 - dot_ofs);
             num_hdr = buf + pre_ofs;
             num_end = write_u64_len_16_to_17_trim(sig_dec, num_hdr);
             
-            /* seperate these digits to leave a space for dot */
+            /* seperate these digits to leave a space for the dot */
             num_sep_pos = no_pre_zero ? dot_ofs : 0;
             num_sep = num_hdr + num_sep_pos;
             byte_move_16(num_sep + no_pre_zero, num_sep);
@@ -2664,7 +2675,7 @@ static_inline u8 *write_f64_raw(u8 *buf, u64 raw) {
         exp_bin = 1 - F64_EXP_BIAS - F64_SIG_BITS;
         
         /* binary to decimal */
-        f64_bin_to_dec(sig_raw, exp_raw, sig_bin, exp_bin, &sig_dec, &exp_dec);
+        f64_bin_to_dec(sig_bin, exp_bin, &sig_dec, &exp_dec);
         
         /* write significand part */
         end = write_u64_len_1_to_17(sig_dec, buf + 1);
