@@ -22,6 +22,58 @@ if(MSVC)
 endif()
 
 
+
+# ------------------------------------------------------------------------------
+# native arch
+option(ARCH_NATIVE "Enable native arch" OFF)
+if(ARCH_NATIVE AND CMAKE_C_COMPILER_ID MATCHES "GNU|Clang|Intel|MSVC")
+    include(CheckCCompilerFlag)
+    include(CheckCSourceRuns)
+
+    set(ISA_LIST
+        "AVX512|/arch:AVX512|-mavx512f|#include <immintrin.h>\nint main(){__m512i a = _mm512_setzero_si512()\\\;return 0\\\;}"
+        "AVX2|/arch:AVX2|-mavx2|#include <immintrin.h>\nint main(){__m256i a = _mm256_setzero_si256()\\\;return 0\\\;}"
+        "SSE2|/arch:SSE2|-msse2|#include <immintrin.h>\nint main(){__m128i a = _mm_setzero_si128()\\\;return 0\\\;}"
+    )
+
+    foreach(ISA_INFO IN LISTS ISA_LIST)
+        string(REPLACE "|" ";" ISA_INFO "${ISA_INFO}")
+        list(GET ISA_INFO 0 ISA_NAME)
+        if(MSVC)
+            list(GET ISA_INFO 1 ISA_FLAG)
+        else()
+            list(GET ISA_INFO 2 ISA_FLAG)
+        endif()
+        list(GET ISA_INFO 3 ISA_CHECK_CODE)
+
+        message(STATUS "Check ${ISA_NAME} support")
+        file(WRITE "${CMAKE_BINARY_DIR}/${ISA_NAME}_check.c" "${ISA_CHECK_CODE}")
+        try_run(RUN_RESULT COMPILE_RESULT
+            "${CMAKE_BINARY_DIR}/${ISA_NAME}_check"
+            "${CMAKE_BINARY_DIR}/${ISA_NAME}_check.c"
+            COMPILE_DEFINITIONS "${ISA_FLAG}"
+            COMPILE_OUTPUT_VARIABLE COMPILE_OUTPUT
+            RUN_OUTPUT_VARIABLE RUN_OUTPUT
+        )
+
+        if(COMPILE_RESULT AND RUN_RESULT EQUAL 0)
+            if(NOT ISA_FLAG_NATIVE)
+                set(ISA_FLAG_NATIVE ${ISA_FLAG})
+            endif()
+            add_definitions(-DHAVE_${ISA_NAME})
+            message(STATUS "Define HAVE_${ISA_NAME}=1")
+        endif()
+    endforeach()
+
+    if(MSVC AND ISA_FLAG_NATIVE)
+        add_compile_options(${ISA_FLAG_NATIVE})
+    elseif(NOT MSVC)
+        add_compile_options(-march=native)
+    endif()
+endif()
+
+
+
 # ------------------------------------------------------------------------------
 # vendor
 set(vendors "")
@@ -173,5 +225,3 @@ endif()
 
 # copy test data
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-

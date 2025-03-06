@@ -576,11 +576,6 @@ static void dtoa_func_register_all(void) {
     dtoa_func_register(swift)
     dtoa_func_register(fmtlib)
     dtoa_func_register(fpconv)
-#ifndef _MSC_VER
-    dtoa_func_register(milo)
-    dtoa_func_register(emyg)
-    dtoa_func_register(ryu)
-#endif
     dtoa_func_register(grisu3)
     dtoa_func_register(schubfach)
     dtoa_func_register(erthink)
@@ -588,6 +583,18 @@ static void dtoa_func_register_all(void) {
     dtoa_func_register(dragonbox)
     dtoa_func_register(ryu_mod)
     dtoa_func_register(yy)
+#ifndef _MSC_VER
+    dtoa_func_register(milo)
+    dtoa_func_register(emyg)
+    dtoa_func_register(ryu)
+#endif
+#ifdef HAVE_SSE2
+    dtoa_func_register(xjb_sse)
+#endif
+#ifdef HAVE_AVX512
+    dtoa_func_register(xjb_avx512)
+#endif
+    
     // dtoa_func_register(printf) // not shortest, too slow
 }
 
