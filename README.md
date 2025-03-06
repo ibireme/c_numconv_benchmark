@@ -124,6 +124,10 @@ Note: the following functions may not generate shortest decimal representation, 
 * emyg
 * erthink
 
+The following functions require SSE2 or AVX512, use `cmake .. -DARCH_NATIVE=ON` to enable them:
+* xjb_sse2
+* xjb_avx512
+
 -------
 
 ### String to Double (strtod)
