@@ -30,8 +30,11 @@ cmake --build . --config Release
 ./run_strtod -o report_strtod.html
 ```
 
-If you want to build with other compiler or IDE, try these commands:
+Build with other compiler or IDE:
 ```shell
+# Use arch native:
+cmake .. -DARCH_NATIVE=ON
+
 # Clang for Linux/Unix:
 cmake .. -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
 
