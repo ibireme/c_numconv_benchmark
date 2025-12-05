@@ -54,22 +54,24 @@ critical boundary conditions.
 
 Focusing on the decimal result, consider this example:
 
-bin_prev: 0x10000000000003 * 2^23
-bin:      0x10000000000004 * 2^23
-bin_next: 0x10000000000005 * 2^23
+bin_prev: 0x1000000000001D * 2^23
+bin:      0x1000000000001E * 2^23
+bin_next: 0x1000000000001F * 2^23
 
 ulp = 8.388608 * 10^6
-dec_prev: 37778931862957186.875392 * 10^6
-dec:      37778931862957195.264000 * 10^6
-dec_next: 37778931862957203.652608 * 10^6
+dec_prev: 37778931862957404.979200 * 10^6
+dec:      37778931862957413.367808 * 10^6
+dec_next: 37778931862957421.756416 * 10^6
 
-            d0             d1 c  u1                            u0               next
-    ----|----|----|----|----|-*--|----|----|----|----|----|----|----|----|----|--*-|---
-        9    0    1    2    3    4    5    6    7    8    9    0    1    2    3    4
+            d0             d1 c  u1                            u0    next      
+    ----|----|----|----|----|-*--|----|----|----|----|----|----|----|--*-|----
+        9    0    1    2    3    4    5    6    7    8    9    0    1    2
           |___________________|___________________|
                              1ulp
 
-The 1ulp falls in [1.0, 10.0), the acceptable range for dec is +/-0.5ulp.
+The 1ulp falls in [1.0, 10.0), the acceptable range for dec is +/-0.5ulp:
+dec - 0.5ulp: 37778931862957409.173504 * 10^6
+dec + 0.5ulp: 37778931862957417.562112 * 10^6
 
 Rounding dec to an integer involves these cases:
 1. Fractional part < x.5: round down by 1 (as shown)
